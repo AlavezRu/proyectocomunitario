@@ -1,0 +1,460 @@
+<?php
+require_once '../../Shared/Infrastructure/Database/Connection.php';
+
+$pageTitle = "Comuneros y Avecindados";
+$activePage = "comuneros";
+
+// Obtener tab actual (activos por defecto)
+$tab = isset($_GET['tab']) ? $_GET['tab'] : 'activos';
+
+// Obtener comuneros activos
+$query_activos = "
+    SELECT c.id_comunero, c.numero_progresivo, c.nombre_completo, c.telefono, s.descripcion as situacion, l.nombre as localidad, c.activo
+    FROM comunero c
+    JOIN situacion s ON c.id_situacion = s.id_situacion
+    JOIN localidad l ON c.id_localidad = l.id_localidad
+    WHERE c.activo = TRUE
+    ORDER BY c.numero_progresivo ASC
+";
+$resultado_activos = pg_query($conexion, $query_activos);
+
+// Obtener comuneros inactivos
+$query_inactivos = "
+    SELECT c.id_comunero, c.numero_progresivo, c.nombre_completo, c.telefono, s.descripcion as situacion, l.nombre as localidad, c.activo
+    FROM comunero c
+    JOIN situacion s ON c.id_situacion = s.id_situacion
+    JOIN localidad l ON c.id_localidad = l.id_localidad
+    WHERE c.activo = FALSE
+    ORDER BY c.numero_progresivo ASC
+";
+$resultado_inactivos = pg_query($conexion, $query_inactivos);
+
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysComunal | Comuneros</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<?= $GLOBALS['ASSETS_URL'] ?>/Css/style.css">
+    <style>
+        .modal-delete {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        .modal-delete.active {
+            display: flex;
+        }
+        .modal-delete-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+            animation: slideUp 0.3s ease-out;
+        }
+        .modal-delete-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-delete-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--danger);
+            font-size: 1.5rem;
+        }
+        .modal-delete-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+        }
+        .modal-delete-description {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .modal-delete-info {
+            background: rgba(239, 68, 68, 0.05);
+            border-left: 4px solid var(--danger);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+        .modal-delete-info strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: var(--danger);
+        }
+        .modal-delete-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .btn-modal {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-modal-cancel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+        .btn-modal-cancel:hover {
+            background: #f1f5f9;
+        }
+        .btn-modal-delete {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-modal-delete:hover {
+            background: #dc2626;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <?php include '../../Shared/Ui/Layout/sidebar.php'; ?>
+
+    <main class="main-wrapper">
+        <?php include '../../Shared/Ui/Layout/header.php'; ?>
+
+        <div class="content-container animate-fade-in">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div>
+                    <h1 style="font-size: 1.75rem; color: var(--text-main); margin-bottom: 0.5rem;">Gestión de Comuneros</h1>
+                    <p style="color: var(--text-muted);">Directorio completo de comuneros y avecindados</p>
+                </div>
+                <div>
+                    <a href="/proyectocomunitariov3/public/index.php?page=comuneros_formulario" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Registrar Nuevo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Pestañas de Estado -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border);">
+                <button class="tab-button <?= $tab === 'activos' ? 'active' : '' ?>" 
+                        onclick="window.location.href='/proyectocomunitariov3/public/index.php?page=comuneros&tab=activos';"
+                        style="padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                    <i class="fas fa-check-circle"></i> Comuneros Activos (<?= pg_num_rows($resultado_activos) ?>)
+                </button>
+                <button class="tab-button <?= $tab === 'inactivos' ? 'active' : '' ?>" 
+                        onclick="window.location.href='/proyectocomunitariov3/public/index.php?page=comuneros&tab=inactivos';"
+                        style="padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                    <i class="fas fa-ban"></i> Comuneros Inactivos (<?= pg_num_rows($resultado_inactivos) ?>)
+                </button>
+            </div>
+
+            <div class="glass-panel" style="padding: 1.5rem;">
+                <div style="margin-bottom: 1.5rem;">
+                    <input type="text" id="busquedaInput" placeholder="Buscar por nombre o número progresivo..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 0.875rem;">
+                </div>
+
+                <!-- Tab: Comuneros Activos -->
+                <?php if ($tab === 'activos'): ?>
+                <div style="overflow-x: auto; max-height: 600px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 600; font-size: 0.875rem;">
+                                <th style="padding: 1rem 0.5rem;">N°</th>
+                                <th style="padding: 1rem 0.5rem;">Nombre Completo</th>
+                                <th style="padding: 1rem 0.5rem;">Teléfono</th>
+                                <th style="padding: 1rem 0.5rem;">Estatus</th>
+                                <th style="padding: 1rem 0.5rem;">Localidad</th>
+                                <th style="padding: 1rem 0.5rem; text-align: center;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (pg_num_rows($resultado_activos) > 0): ?>
+                                <?php while ($row = pg_fetch_assoc($resultado_activos)): ?>
+                                    <tr class="fila-comunero" data-nombre="<?= strtolower(htmlspecialchars($row['nombre_completo'])) ?>" data-numero="<?= str_pad($row['numero_progresivo'], 4, '0', STR_PAD_LEFT) ?>" style="border-bottom: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
+                                        <td style="padding: 1rem 0.5rem; font-weight: 500;"><?= str_pad($row['numero_progresivo'], 4, '0', STR_PAD_LEFT) ?></td>
+                                        <td style="padding: 1rem 0.5rem;"><?= htmlspecialchars($row['nombre_completo']) ?></td>
+                                        <td style="padding: 1rem 0.5rem;">
+                                            <?php if (!empty($row['telefono'])): ?>
+                                                <a href="tel:<?= htmlspecialchars($row['telefono']) ?>" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                                                    <i class="fas fa-phone"></i> <?= htmlspecialchars($row['telefono']) ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span style="color: var(--text-muted);">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="padding: 1rem 0.5rem;">
+                                            <span style="background: <?= $row['situacion'] == 'Comunero' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(37, 99, 235, 0.1)' ?>; color: <?= $row['situacion'] == 'Comunero' ? 'var(--secondary)' : 'var(--primary)' ?>; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                                <?= htmlspecialchars($row['situacion']) ?>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 1rem 0.5rem;"><?= htmlspecialchars($row['localidad']) ?></td>
+                                        <td style="padding: 1rem 0.5rem; text-align: center;">
+                                            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                                <a href="/proyectocomunitariov3/public/index.php?page=comuneros_formulario&id=<?= $row['id_comunero'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(245, 158, 11, 0.1); color: var(--warning); border-radius: var(--radius-md);" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" onclick="abrirModalEliminar('<?= $row['id_comunero'] ?>', '<?= htmlspecialchars($row['nombre_completo']) ?>');" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Desactivar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                                        No se encontraron registros activos.
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+
+                <!-- Tab: Comuneros Inactivos -->
+                <?php if ($tab === 'inactivos'): ?>
+                <div style="overflow-x: auto; max-height: 600px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 600; font-size: 0.875rem;">
+                                <th style="padding: 1rem 0.5rem;">N°</th>
+                                <th style="padding: 1rem 0.5rem;">Nombre Completo</th>
+                                <th style="padding: 1rem 0.5rem;">Teléfono</th>
+                                <th style="padding: 1rem 0.5rem;">Estatus</th>
+                                <th style="padding: 1rem 0.5rem;">Localidad</th>
+                                <th style="padding: 1rem 0.5rem; text-align: center;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (pg_num_rows($resultado_inactivos) > 0): ?>
+                                <?php while ($row = pg_fetch_assoc($resultado_inactivos)): ?>
+                                    <tr class="fila-comunero" data-nombre="<?= strtolower(htmlspecialchars($row['nombre_completo'])) ?>" data-numero="<?= str_pad($row['numero_progresivo'], 4, '0', STR_PAD_LEFT) ?>" style="border-bottom: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
+                                        <td style="padding: 1rem 0.5rem; font-weight: 500;"><?= str_pad($row['numero_progresivo'], 4, '0', STR_PAD_LEFT) ?></td>
+                                        <td style="padding: 1rem 0.5rem;"><?= htmlspecialchars($row['nombre_completo']) ?></td>
+                                        <td style="padding: 1rem 0.5rem;">
+                                            <?php if (!empty($row['telefono'])): ?>
+                                                <a href="tel:<?= htmlspecialchars($row['telefono']) ?>" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                                                    <i class="fas fa-phone"></i> <?= htmlspecialchars($row['telefono']) ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span style="color: var(--text-muted);">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="padding: 1rem 0.5rem;">
+                                            <span style="background: rgba(107, 114, 128, 0.1); color: var(--text-muted); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
+                                                Inactivo
+                                            </span>
+                                        </td>
+                                        <td style="padding: 1rem 0.5rem;"><?= htmlspecialchars($row['localidad']) ?></td>
+                                        <td style="padding: 1rem 0.5rem; text-align: center;">
+                                            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                                <button type="button" onclick="abrirModalReactivar('<?= $row['id_comunero'] ?>', '<?= htmlspecialchars($row['nombre_completo']) ?>');" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(16, 185, 129, 0.1); color: var(--secondary); border-radius: var(--radius-md);" title="Reactivar">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                                        No hay comuneros inactivos.
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Confirmación para Eliminar -->
+    <div id="modalEliminar" class="modal-delete">
+        <div class="modal-delete-content">
+            <div class="modal-delete-header">
+                <div class="modal-delete-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 class="modal-delete-title">¿Desactivar comunero?</h2>
+            </div>
+            
+            <p class="modal-delete-description">
+                Estás apunto de desactivar este registro. Esta acción marcará el comunero como inactivo.
+            </p>
+
+            <div class="modal-delete-info">
+                <strong>⚠️ Información del registro:</strong>
+                <div id="infoNombre" style="margin-top: 0.5rem;"></div>
+            </div>
+
+            <div class="modal-delete-footer">
+                <button type="button" class="btn-modal btn-modal-cancel" onclick="cerrarModalEliminar()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn-modal btn-modal-delete" onclick="confirmarEliminar()">
+                    <i class="fas fa-trash"></i> Desactivar Registro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Reactivar -->
+    <div id="modalReactivar" class="modal-delete">
+        <div class="modal-delete-content">
+            <div class="modal-delete-header">
+                <div class="modal-delete-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--secondary);">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="modal-delete-title">¿Reactivar comunero?</h2>
+            </div>
+            
+            <p class="modal-delete-description">
+                Estás apunto de reactivar este registro. El comunero volverá a aparecer en la lista de activos.
+            </p>
+
+            <div class="modal-delete-info" style="background: rgba(16, 185, 129, 0.05); border-left-color: var(--secondary);">
+                <strong style="color: var(--secondary);">✓ Información del registro:</strong>
+                <div id="infoNombreReactivar" style="margin-top: 0.5rem;"></div>
+            </div>
+
+            <div class="modal-delete-footer">
+                <button type="button" class="btn-modal btn-modal-cancel" onclick="cerrarModalReactivar()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn-modal btn-modal-delete" style="background: var(--secondary); color: white;" onclick="confirmarReactivar()" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='var(--secondary)'">
+                    <i class="fas fa-redo"></i> Reactivar Registro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let idEliminar = null;
+        let idReactivar = null;
+
+        // ===== Funciones para Desactivar =====
+        function abrirModalEliminar(id, nombre) {
+            idEliminar = id;
+            document.getElementById('infoNombre').textContent = nombre;
+            document.getElementById('modalEliminar').classList.add('active');
+        }
+
+        function cerrarModalEliminar() {
+            document.getElementById('modalEliminar').classList.remove('active');
+            idEliminar = null;
+        }
+
+        function confirmarEliminar() {
+            if (idEliminar) {
+                window.location.href = '/proyectocomunitariov3/src/Comuneros/Application/acciones.php?accion=desactivar&id=' + idEliminar;
+            }
+        }
+
+        // ===== Funciones para Reactivar =====
+        function abrirModalReactivar(id, nombre) {
+            idReactivar = id;
+            document.getElementById('infoNombreReactivar').textContent = nombre;
+            document.getElementById('modalReactivar').classList.add('active');
+        }
+
+        function cerrarModalReactivar() {
+            document.getElementById('modalReactivar').classList.remove('active');
+            idReactivar = null;
+        }
+
+        function confirmarReactivar() {
+            if (idReactivar) {
+                window.location.href = '/proyectocomunitariov3/src/Comuneros/Application/acciones.php?accion=reactivar&id=' + idReactivar;
+            }
+        }
+
+        // Cerrar modal al presionar ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarModalEliminar();
+                cerrarModalReactivar();
+            }
+        });
+
+        // Cerrar modal si se hace clic fuera del contenido
+        document.getElementById('modalEliminar').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModalEliminar();
+            }
+        });
+
+        document.getElementById('modalReactivar').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModalReactivar();
+            }
+        });
+
+        // Búsqueda en tiempo real
+        document.getElementById('busquedaInput').addEventListener('keyup', function() {
+            const termino = this.value.toLowerCase();
+            const filas = document.querySelectorAll('.fila-comunero');
+            
+            filas.forEach(fila => {
+                const nombre = fila.getAttribute('data-nombre');
+                const numero = fila.getAttribute('data-numero');
+                
+                if (nombre.includes(termino) || numero.includes(termino)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        });
+
+        // Estilos dinámicos para las pestañas activas
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            const isActive = btn.textContent.includes('<?= $tab === "activos" ? "Activos" : "Inactivos" ?>');
+            if (isActive) {
+                btn.style.color = 'var(--primary)';
+                btn.style.borderBottomColor = 'var(--primary)';
+            }
+        });
+    </script>
+</body>
+</html>
