@@ -15,7 +15,7 @@
             </div>
         </button>
         <div class="dropdown-menu" id="userDropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); min-width: 200px; z-index: 1000; margin-top: 0.5rem;">
-            <a href="/proyectocomunitariov3/public/logout.php" style="display: block; padding: 0.75rem 1rem; color: var(--danger); text-decoration: none; transition: background 150ms; border-bottom: 1px solid var(--border);">
+            <a href="/proyectocomunitario/public/logout.php" style="display: block; padding: 0.75rem 1rem; color: var(--danger); text-decoration: none; transition: background 150ms; border-bottom: 1px solid var(--border);">
                 <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
             </a>
         </div>

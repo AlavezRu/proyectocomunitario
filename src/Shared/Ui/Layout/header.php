@@ -11,11 +11,11 @@
                 <div style="color: var(--text-muted); font-size: 0.75rem;">San Bartolo Soyaltepec</div>
             </div>
             <div class="avatar" style="background: #f8fafc; border: 2px solid var(--border);">
-                <img src="/proyectocomunitariov3/shared/img/logosinfond.png" alt="Escudo" style="width: 26px; height: 26px; object-fit: contain;">
+                <img src="/proyectocomunitario/shared/img/logosinfond.png" alt="Escudo" style="width: 26px; height: 26px; object-fit: contain;">
             </div>
         </button>
         <div class="dropdown-menu" id="userDropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); min-width: 200px; z-index: 1000; margin-top: 0.5rem;">
-            <a href="/proyectocomunitariov3/public/logout.php" style="display: block; padding: 0.75rem 1rem; color: var(--danger); text-decoration: none; transition: background 150ms; border-bottom: 1px solid var(--border);">
+            <a href="/proyectocomunitario/public/logout.php" style="display: block; padding: 0.75rem 1rem; color: var(--danger); text-decoration: none; transition: background 150ms; border-bottom: 1px solid var(--border);">
                 <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
             </a>
         </div>

@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
 
             pg_query($conexion, "COMMIT");
-            header("Location: /proyectocomunitariov3/public/index.php?page=tequios&msg=list_saved");
+            header("Location: /proyectocomunitario/public/index.php?page=tequios&msg=list_saved");
             exit;
 
         } catch (Exception $e) {
@@ -54,6 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-header("Location: /proyectocomunitariov3/public/index.php?page=tequios");
+header("Location: /proyectocomunitario/public/index.php?page=tequios");
 exit;
 ?>

@@ -129,11 +129,11 @@ $q_comuneros = pg_query($conexion, "SELECT id_comunero, numero_progresivo, nombr
                     <button type="submit" form="frmActa" class="btn btn-primary">
                         <i class="fas fa-save"></i> <?= $modo === 'editar' ? 'Actualizar Acta' : 'Guardar Acta' ?>
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=actas" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
+                    <a href="/proyectocomunitario/public/index.php?page=actas" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
                 </div>
             </div>
 
-            <form id="frmActa" action="/proyectocomunitariov3/src/ActasDePosesion/Application/acciones.php" method="POST" enctype="multipart/form-data">
+            <form id="frmActa" action="/proyectocomunitario/src/ActasDePosesion/Application/acciones.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="accion" value="<?= $modo ?>">
                 <?php if ($modo === 'editar'): ?>
                     <input type="hidden" name="id_acta" value="<?= $acta_existente['id_acta'] ?>">
@@ -219,7 +219,7 @@ $q_comuneros = pg_query($conexion, "SELECT id_comunero, numero_progresivo, nombr
                                         </div>
                                     </div>
                                     <div style="display: flex; gap: 0.5rem; flex-shrink: 0; margin-left: 0.75rem;">
-                                        <a href="/proyectocomunitariov3/<?= htmlspecialchars($doc['ruta_archivo']) ?>" target="_blank" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: white; border: 1px solid var(--border); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;" title="Descargar documento">
+                                        <a href="/proyectocomunitario/<?= htmlspecialchars($doc['ruta_archivo']) ?>" target="_blank" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: white; border: 1px solid var(--border); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;" title="Descargar documento">
                                             <i class="fas fa-download"></i> Ver
                                         </a>
                                         <button type="button" class="btn-delete-doc" data-id="<?= $doc['id_archivo'] ?>" data-name="<?= htmlspecialchars($doc['nombre_archivo']) ?>" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; background: white; border: 1px solid var(--danger); color: var(--danger); cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; border-radius: var(--radius-md);" title="Eliminar documento">
@@ -895,7 +895,7 @@ $q_comuneros = pg_query($conexion, "SELECT id_comunero, numero_progresivo, nombr
                     formData.append('id_archivo', id_archivo);
                     formData.append('id_acta', '<?= $id_acta;?>');
 
-                    fetch('/proyectocomunitariov3/src/ActasDePosesion/Application/acciones.php', {
+                    fetch('/proyectocomunitario/src/ActasDePosesion/Application/acciones.php', {
                         method: 'POST',
                         body: formData
                     })

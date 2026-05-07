@@ -72,7 +72,7 @@ $participacion_tequios = pg_fetch_result($q_participacion_tequios, 0, 0) ?: 0;
 
     <!-- Marca de agua institucional (hijo directo de body para que position:fixed funcione correctamente) -->
     <div aria-hidden="true" style="pointer-events: none; position: fixed; top: 50%; left: calc(140px + 50vw); transform: translate(-50%, -50%); z-index: 0; opacity: 0.05;">
-        <img src="/proyectocomunitariov3/shared/img/logosinfond.png" alt="" style="width: 600px; height: 600px; object-fit: contain; display: block;">
+        <img src="/proyectocomunitario/shared/img/logosinfond.png" alt="" style="width: 600px; height: 600px; object-fit: contain; display: block;">
     </div>
 
     <?php include '../../Shared/Ui/Layout/sidebar.php'; ?>
@@ -86,7 +86,7 @@ $participacion_tequios = pg_fetch_result($q_participacion_tequios, 0, 0) ?: 0;
             <p style="color: var(--text-secondary); margin-bottom: 2rem;">Resumen general del estado de la comunidad - Año <?= $anio_actual ?></p>
 
             <!-- SECCIÓN: GESTIÓN DE PERSONAS -->
-            <h2 style="font-size: 1.3rem; color: var(--text-main); margin-top: 2rem; margin-bottom: 1rem;">👥 Gestión de Personas</h2>
+            <h2 style="font-size: 1.3rem; color: var(--text-main); margin-top: 2rem; margin-bottom: 1rem;">Gestión de Personas</h2>
             <div class="dashboard-grid">
                 <div class="glass-panel stat-card">
                     <div class="stat-icon primary">
@@ -130,7 +130,7 @@ $participacion_tequios = pg_fetch_result($q_participacion_tequios, 0, 0) ?: 0;
             </div>
 
             <!-- SECCIÓN: ASAMBLEAS -->
-            <h2 style="font-size: 1.3rem; color: var(--text-main); margin-top: 2rem; margin-bottom: 1rem;">📋 Asambleas</h2>
+            <h2 style="font-size: 1.3rem; color: var(--text-main); margin-top: 2rem; margin-bottom: 1rem;">Asambleas</h2>
             <div class="dashboard-grid">
                 <div class="glass-panel stat-card">
                     <div class="stat-icon primary">
@@ -165,7 +165,7 @@ $participacion_tequios = pg_fetch_result($q_participacion_tequios, 0, 0) ?: 0;
             </div>
 
             <!-- SECCIÓN: TEQUIOS -->
-            <h2 style="font-size: 1.3rem; color: var(--text-main); margin-top: 2rem; margin-bottom: 1rem;">🔨 Tequios (Trabajos Comunitarios)</h2>
+            <h2 style="font-size: 1.3rem; color: var(--text-main); margin-top: 2rem; margin-bottom: 1rem;">Tequios (Trabajos Comunitarios)</h2>
             <div class="dashboard-grid">
                 <div class="glass-panel stat-card">
                     <div class="stat-icon warning">
@@ -200,7 +200,7 @@ $participacion_tequios = pg_fetch_result($q_participacion_tequios, 0, 0) ?: 0;
             </div>
 
             <!-- SECCIÓN: INFORMACIÓN RECIENTE -->
-            <h2 style="font-size: 1.3rem; color: var(--text-main); margin-top: 2rem; margin-bottom: 1rem;">📅 Actividades Recientes</h2>
+            <h2 style="font-size: 1.3rem; color: var(--text-main); margin-top: 2rem; margin-bottom: 1rem;">Actividades Recientes</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
                 <!-- Últimas Asambleas -->
                 <div class="glass-panel">

@@ -66,7 +66,7 @@ if ($accion == 'nuevo' || $accion == 'editar') {
         }
 
         pg_query($conexion, "COMMIT");
-        header("Location: /proyectocomunitariov3/public/index.php?page=comuneros&msg=success");
+        header("Location: /proyectocomunitario/public/index.php?page=comuneros&msg=success");
         exit;
 
     } catch (Exception $e) {
@@ -78,17 +78,17 @@ if ($accion == 'nuevo' || $accion == 'editar') {
     if ($id_comunero > 0) {
         pg_query_params($conexion, "UPDATE comunero SET activo = FALSE WHERE id_comunero = $1", [$id_comunero]);
     }
-    header("Location: /proyectocomunitariov3/public/index.php?page=comuneros&msg=deleted");
+    header("Location: /proyectocomunitario/public/index.php?page=comuneros&msg=deleted");
     exit;
 } elseif ($accion == 'reactivar') {
     $id_comunero = isset($_GET['id']) ? (int)$_GET['id'] : 0;
     if ($id_comunero > 0) {
         pg_query_params($conexion, "UPDATE comunero SET activo = TRUE WHERE id_comunero = $1", [$id_comunero]);
     }
-    header("Location: /proyectocomunitariov3/public/index.php?page=comuneros&tab=inactivos&msg=reactivated");
+    header("Location: /proyectocomunitario/public/index.php?page=comuneros&tab=inactivos&msg=reactivated");
     exit;
 } else {
-    header("Location: /proyectocomunitariov3/public/index.php?page=comuneros");
+    header("Location: /proyectocomunitario/public/index.php?page=comuneros");
     exit;
 }
 ?>

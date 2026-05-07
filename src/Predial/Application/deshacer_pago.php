@@ -8,6 +8,6 @@ if ($id_pago > 0) {
     pg_query_params($conexion, "DELETE FROM pago_predial WHERE id_pago = $1", [$id_pago]);
 }
 
-header("Location: /proyectocomunitariov3/public/index.php?page=predial&anio=" . $anio . "&msg=undone");
+header("Location: /proyectocomunitario/public/index.php?page=predial&anio=" . $anio . "&msg=undone");
 exit;
 ?>

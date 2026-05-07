@@ -8,5 +8,5 @@ require_once '../src/Shared/Infrastructure/Auth/Session.php';
 Session::iniciar();
 Session::destruir();
 
-header("Location: /proyectocomunitariov3/public/login.php?msg=logout");
+header("Location: /proyectocomunitario/public/login.php?msg=logout");
 exit;

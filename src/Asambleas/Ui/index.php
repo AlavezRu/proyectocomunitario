@@ -53,7 +53,7 @@ $q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia
                     <p style="color: var(--text-muted);">Administración de asambleas generales y extraordinarias</p>
                 </div>
                 <div>
-                    <a href="/proyectocomunitariov3/public/index.php?page=asambleas_formulario" class="btn btn-primary">
+                    <a href="/proyectocomunitario/public/index.php?page=asambleas_formulario" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Nueva Asamblea
                     </a>
                 </div>
@@ -95,11 +95,11 @@ $q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia
                                         </td>
                                         <td style="padding: 1rem 0.5rem; text-align: center; display: flex; gap: 0.5rem; justify-content: center;">
                                             <!-- Editar -->
-                                            <a href="/proyectocomunitariov3/public/index.php?page=asambleas_editar&id=<?= $row['id_asamblea'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(251, 146, 60, 0.1); color: #ea580c; border-radius: var(--radius-md);" title="Editar Asamblea">
+                                            <a href="/proyectocomunitario/public/index.php?page=asambleas_editar&id=<?= $row['id_asamblea'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(251, 146, 60, 0.1); color: #ea580c; border-radius: var(--radius-md);" title="Editar Asamblea">
                                                 <i class="fas fa-edit"></i> Editar
                                             </a>
                                             <!-- Pase de lista -->
-                                            <a href="/proyectocomunitariov3/public/index.php?page=asambleas_pase_lista&id=<?= $row['id_asamblea'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(37, 99, 235, 0.1); color: var(--primary); border-radius: var(--radius-md);" title="Pase de Lista">
+                                            <a href="/proyectocomunitario/public/index.php?page=asambleas_pase_lista&id=<?= $row['id_asamblea'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(37, 99, 235, 0.1); color: var(--primary); border-radius: var(--radius-md);" title="Pase de Lista">
                                                 <i class="fas fa-users-cog"></i> Pase Lista
                                             </a>
                                         </td>
@@ -120,7 +120,7 @@ $q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia
                 <?php if ($total_paginas > 1): ?>
                 <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
                     <?php for ($i=1; $i<=$total_paginas; $i++): ?>
-                        <a href="/proyectocomunitariov3/public/index.php?page=asambleas&p=<?= $i ?>" 
+                        <a href="/proyectocomunitario/public/index.php?page=asambleas&p=<?= $i ?>" 
                            style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); text-decoration: none; font-weight: 500; font-size: 0.875rem;
                            <?= $i == $pagina_actual ? 'background: var(--primary); color: white; box-shadow: var(--shadow-md);' : 'background: white; border: 1px solid var(--border); color: var(--text-muted);' ?>">
                             <?= $i ?>

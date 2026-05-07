@@ -115,7 +115,7 @@ $anios = range(date('Y') - 10, date('Y'));
 
             <div class="dashboard-grid">
                 <!-- 1. Padron completo -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=padron" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=padron" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon primary">
                             <i class="fas fa-list-ul"></i>
@@ -128,7 +128,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 2. Adeudo Predial -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=adeudo_predial" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=adeudo_predial" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='var(--danger)'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon danger">
                             <i class="fas fa-file-invoice-dollar"></i>
@@ -141,7 +141,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 3. Sin Sucesores -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=sin_sucesores" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=sin_sucesores" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='var(--warning)'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon warning">
                             <i class="fas fa-user-slash"></i>
@@ -154,7 +154,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 4. Por Localidad -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=por_localidad" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=por_localidad" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='var(--secondary)'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon secondary">
                             <i class="fas fa-map-marker-alt"></i>
@@ -167,7 +167,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 5. Actas de Posesión -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=actas" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=actas" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='#8b5cf6'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
                             <i class="fas fa-file-contract"></i>
@@ -180,7 +180,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 6. Asambleas -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=asambleas" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=asambleas" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='#06b6d4'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon" style="background: rgba(6, 182, 212, 0.1); color: #06b6d4;">
                             <i class="fas fa-users-cog"></i>
@@ -193,7 +193,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 7. Tequios -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=tequios" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=tequios" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='#ec4899'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;">
                             <i class="fas fa-hands-helping"></i>
@@ -206,7 +206,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 8. Pagos Prediales -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=pagos" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=pagos" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
                             <i class="fas fa-money-bill-wave"></i>
@@ -219,7 +219,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 9. Situación de Comuneros -->
-                <a href="/proyectocomunitariov3/public/reportes_generar.php?tipo=situacion_comuneros" target="_blank" style="text-decoration: none; color: inherit;">
+                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=situacion_comuneros" target="_blank" style="text-decoration: none; color: inherit;">
                     <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='#14b8a6'" onmouseout="this.style.borderColor='var(--border)'">
                         <div class="stat-icon" style="background: rgba(20, 184, 166, 0.1); color: #14b8a6;">
                             <i class="fas fa-chart-pie"></i>
@@ -279,7 +279,7 @@ $anios = range(date('Y') - 10, date('Y'));
         if (situacion) params.append('situacion', situacion);
         if (anio) params.append('anio', anio);
 
-        window.open('/proyectocomunitariov3/public/reportes_generar.php?' + params.toString(), '_blank');
+        window.open('/proyectocomunitario/public/reportes_generar.php?' + params.toString(), '_blank');
     });
     </script>
 

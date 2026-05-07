@@ -36,11 +36,11 @@ $activePage = "asambleas";
                     <button type="submit" form="frmAsamblea" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar Asamblea
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=asambleas" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
+                    <a href="/proyectocomunitario/public/index.php?page=asambleas" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
                 </div>
             </div>
 
-            <form id="frmAsamblea" action="/proyectocomunitariov3/src/Asambleas/Application/guardar_asamblea.php" method="POST">
+            <form id="frmAsamblea" action="/proyectocomunitario/src/Asambleas/Application/guardar_asamblea.php" method="POST">
                 <div class="glass-panel" style="padding: 2rem; max-width: 600px;">
                     <div class="form-group">
                         <label class="form-label">Fecha de Asamblea *</label>

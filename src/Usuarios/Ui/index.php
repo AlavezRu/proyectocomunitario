@@ -55,7 +55,7 @@ while ($row = pg_fetch_assoc($resultado)) {
                     <p style="color: var(--text-muted);">Administración de cuentas de usuario del sistema</p>
                 </div>
                 <div>
-                    <a href="/proyectocomunitariov3/public/index.php?page=usuarios_formulario" class="btn btn-primary">
+                    <a href="/proyectocomunitario/public/index.php?page=usuarios_formulario" class="btn btn-primary">
                         <i class="fas fa-user-plus"></i> Nuevo Usuario
                     </a>
                 </div>
@@ -112,7 +112,7 @@ while ($row = pg_fetch_assoc($resultado)) {
                                         </td>
                                         <td style="padding: 1rem 0.5rem;">
                                             <div style="display: flex; gap: 0.5rem;">
-                                                <a href="/proyectocomunitariov3/public/index.php?page=usuarios_formulario&editar=<?= $usuario['id_usuario'] ?>" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.875rem; background: white; border: 1px solid var(--border); color: var(--primary);">
+                                                <a href="/proyectocomunitario/public/index.php?page=usuarios_formulario&editar=<?= $usuario['id_usuario'] ?>" class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.875rem; background: white; border: 1px solid var(--border); color: var(--primary);">
                                                     <i class="fas fa-edit"></i> Editar
                                                 </a>
                                                 <button class="btn" onclick="abrirModalPassword(<?= $usuario['id_usuario'] ?>)" style="padding: 0.5rem 0.75rem; font-size: 0.875rem; background: white; border: 1px solid var(--border); color: var(--warning);">
@@ -151,7 +151,7 @@ while ($row = pg_fetch_assoc($resultado)) {
                 </div>
                 <button type="button" class="close-btn" onclick="cerrarModalEliminar()">&times;</button>
             </div>
-            <form method="POST" action="/proyectocomunitariov3/src/Usuarios/Application/acciones.php">
+            <form method="POST" action="/proyectocomunitario/src/Usuarios/Application/acciones.php">
                 <div class="modal-body">
                     <input type="hidden" name="accion" value="eliminar">
                     <input type="hidden" name="id_usuario" id="eliminarUserId" value="">
@@ -184,7 +184,7 @@ while ($row = pg_fetch_assoc($resultado)) {
                 <h2>Cambiar Contraseña</h2>
                 <button type="button" class="close-btn" onclick="cerrarModalPassword()">&times;</button>
             </div>
-            <form method="POST" action="/proyectocomunitariov3/src/Usuarios/Application/acciones.php">
+            <form method="POST" action="/proyectocomunitario/src/Usuarios/Application/acciones.php">
                 <div class="modal-body">
                     <input type="hidden" name="accion" value="cambiar_password">
                     <input type="hidden" name="id_usuario" id="modalUserId" value="">

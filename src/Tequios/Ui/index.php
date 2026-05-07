@@ -54,7 +54,7 @@ $q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento
                     <p style="color: var(--text-muted);">Administración de faenas y tequios asignados a la comunidad</p>
                 </div>
                 <div>
-                    <a href="/proyectocomunitariov3/public/index.php?page=tequios_formulario" class="btn btn-primary">
+                    <a href="/proyectocomunitario/public/index.php?page=tequios_formulario" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Programar Tequio
                     </a>
                 </div>
@@ -96,11 +96,11 @@ $q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento
                                         </td>
                                         <td style="padding: 1rem 0.5rem; text-align: center; display: flex; gap: 0.5rem; justify-content: center;">
                                             <!-- Editar -->
-                                            <a href="/proyectocomunitariov3/public/index.php?page=tequios_editar&id=<?= $row['id_tequio'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(251, 146, 60, 0.1); color: #ea580c; border-radius: var(--radius-md);" title="Editar Tequio">
+                                            <a href="/proyectocomunitario/public/index.php?page=tequios_editar&id=<?= $row['id_tequio'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(251, 146, 60, 0.1); color: #ea580c; border-radius: var(--radius-md);" title="Editar Tequio">
                                                 <i class="fas fa-edit"></i> Editar
                                             </a>
                                             <!-- Pase de lista -->
-                                            <a href="/proyectocomunitariov3/public/index.php?page=tequios_pase_lista&id=<?= $row['id_tequio'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(16, 185, 129, 0.1); color: var(--secondary); border-radius: var(--radius-md);" title="Pase de Lista">
+                                            <a href="/proyectocomunitario/public/index.php?page=tequios_pase_lista&id=<?= $row['id_tequio'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(16, 185, 129, 0.1); color: var(--secondary); border-radius: var(--radius-md);" title="Pase de Lista">
                                                 <i class="fas fa-clipboard-check"></i> Lista
                                             </a>
                                         </td>
@@ -121,7 +121,7 @@ $q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento
                 <?php if ($total_paginas > 1): ?>
                 <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
                     <?php for ($i=1; $i<=$total_paginas; $i++): ?>
-                        <a href="/proyectocomunitariov3/public/index.php?page=tequios&p=<?= $i ?>" 
+                        <a href="/proyectocomunitario/public/index.php?page=tequios&p=<?= $i ?>" 
                            style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); text-decoration: none; font-weight: 500; font-size: 0.875rem;
                            <?= $i == $pagina_actual ? 'background: var(--primary); color: white; box-shadow: var(--shadow-md);' : 'background: white; border: 1px solid var(--border); color: var(--text-muted);' ?>">
                             <?= $i ?>

@@ -167,10 +167,10 @@
 <body>
     <!-- Logos institucionales laterales -->
     <div class="logo-side logo-side--left" aria-hidden="true">
-        <img src="/proyectocomunitariov3/shared/img/logosinfond.png" alt="">
+        <img src="/proyectocomunitario/shared/img/logosinfond.png" alt="">
     </div>
     <div class="logo-side logo-side--right" aria-hidden="true">
-        <img src="/proyectocomunitariov3/shared/img/logosinfond.png" alt="">
+        <img src="/proyectocomunitario/shared/img/logosinfond.png" alt="">
     </div>
 
     <div class="login-container">
@@ -247,12 +247,19 @@
                 formData.append('nombre_usuario', usuario);
                 formData.append('contrasena', contrasena);
 
-                const response = await fetch('/proyectocomunitariov3/src/Shared/Application/authenticate.php', {
+                const response = await fetch('/proyectocomunitario/src/Shared/Application/authenticate.php', {
                     method: 'POST',
                     body: formData
                 });
 
-                const data = await response.json();
+                const rawResponse = await response.text();
+                let data;
+
+                try {
+                    data = JSON.parse(rawResponse);
+                } catch (parseError) {
+                    throw new Error(rawResponse || 'Respuesta no válida del servidor');
+                }
 
                 if (data.success) {
                     alertDiv.className = 'alert alert-success';
@@ -287,7 +294,7 @@
                 alertDiv.className = 'alert alert-error';
                 alertDiv.innerHTML = `
                     <i class="fas fa-exclamation-circle"></i>
-                    Error de conexión. Intente nuevamente.
+                    ${error.message || 'Error de conexión. Intente nuevamente.'}
                 `;
                 alertDiv.style.display = 'block';
 

@@ -96,10 +96,10 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Login exitoso',
-        'redirect' => '/proyectocomunitariov3/index.php'
+        'redirect' => '/proyectocomunitario/index.php'
     ]);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     header('Content-Type: application/json');
     http_response_code(500);
     echo json_encode([

@@ -6,30 +6,25 @@
 require_once __DIR__ . '/../../Shared/Infrastructure/Auth/require_admin.php';
 require_once __DIR__ . '/../../Shared/Infrastructure/Database/Connection.php';
 
-// Helper: redirigir con mensaje
 function redirigir(string $page, string $paramNombre, string $mensaje): void {
-    header('Location: /proyectocomunitariov3/public/index.php?page=' . $page . '&' . $paramNombre . '=' . urlencode($mensaje));
+    header('Location: /proyectocomunitario/public/index.php?page=' . $page . '&' . $paramNombre . '=' . urlencode($mensaje));
     exit;
 }
 
-// Sólo se aceptan peticiones POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirigir('usuarios', 'error', 'Método no permitido.');
 }
 
 $accion = trim($_POST['accion'] ?? '');
 
-// ────────────────────────────────────────────────────────────────
 // CREAR / EDITAR USUARIO
-// ────────────────────────────────────────────────────────────────
 if ($accion === 'nuevo' || $accion === 'editar') {
     $id_usuario = isset($_POST['id_usuario']) ? (int)$_POST['id_usuario'] : 0;
-    $nombre     = trim($_POST['nombre'] ?? '');
+    $nombre = trim($_POST['nombre'] ?? '');
     $usuario_login = trim($_POST['usuario'] ?? '');
-    $id_rol     = (int)($_POST['id_rol'] ?? 0);
-    $activo     = isset($_POST['activo']) ? true : false;
+    $id_rol = (int)($_POST['id_rol'] ?? 0);
+    $activo = isset($_POST['activo']) ? true : false;
 
-    // ── Validaciones ──────────────────────────────────────────────
     if ($nombre === '') {
         redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'El nombre es requerido.');
     }
@@ -46,7 +41,6 @@ if ($accion === 'nuevo' || $accion === 'editar') {
         redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'Debe seleccionar un rol válido.');
     }
 
-    // Verificar que el rol existe en la BD
     $res_rol = pg_query_params($conexion, 'SELECT id_rol FROM rol WHERE id_rol = $1', [$id_rol]);
     if (!$res_rol || pg_num_rows($res_rol) === 0) {
         redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'El rol seleccionado no existe.');
@@ -56,7 +50,7 @@ if ($accion === 'nuevo' || $accion === 'editar') {
 
     try {
         if ($accion === 'nuevo') {
-            $password_nuevo    = $_POST['password_nuevo'] ?? '';
+            $password_nuevo = $_POST['password_nuevo'] ?? '';
             $password_confirmar = $_POST['password_confirmar'] ?? '';
 
             if ($password_nuevo === '') {
@@ -66,7 +60,6 @@ if ($accion === 'nuevo' || $accion === 'editar') {
                 throw new Exception('Las contraseñas no coinciden.');
             }
 
-            // Unicidad del usuario
             $res_existe = pg_query_params($conexion, 'SELECT id_usuario FROM usuario WHERE usuario = $1', [$usuario_login]);
             if (pg_num_rows($res_existe) > 0) {
                 throw new Exception('Ya existe un usuario con ese nombre de usuario.');
@@ -80,21 +73,17 @@ if ($accion === 'nuevo' || $accion === 'editar') {
             }
 
             $mensaje = 'Usuario creado exitosamente.';
-
         } else {
-            // EDITAR
             if ($id_usuario <= 0) {
                 throw new Exception('ID de usuario inválido.');
             }
 
-            // Unicidad del usuario (excluir al propio)
             $res_existe = pg_query_params($conexion, 'SELECT id_usuario FROM usuario WHERE usuario = $1 AND id_usuario <> $2', [$usuario_login, $id_usuario]);
             if (pg_num_rows($res_existe) > 0) {
                 throw new Exception('Ya existe otro usuario con ese nombre de usuario.');
             }
 
-            $sql = 'UPDATE usuario SET nombre = $1, usuario = $2, id_rol = $3, activo = $4
-                    WHERE id_usuario = $5';
+            $sql = 'UPDATE usuario SET nombre = $1, usuario = $2, id_rol = $3, activo = $4 WHERE id_usuario = $5';
             $res = pg_query_params($conexion, $sql, [$nombre, $usuario_login, $id_rol, $activo ? 'true' : 'false', $id_usuario]);
             if (!$res) {
                 throw new Exception('Error al actualizar el usuario.');
@@ -105,7 +94,6 @@ if ($accion === 'nuevo' || $accion === 'editar') {
 
         pg_query($conexion, 'COMMIT');
         redirigir('usuarios', 'mensaje', $mensaje);
-
     } catch (Exception $e) {
         pg_query($conexion, 'ROLLBACK');
         $paginaRetorno = $accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario;
@@ -113,9 +101,7 @@ if ($accion === 'nuevo' || $accion === 'editar') {
     }
 }
 
-// ────────────────────────────────────────────────────────────────
 // ELIMINAR USUARIO
-// ────────────────────────────────────────────────────────────────
 if ($accion === 'eliminar') {
     $id_usuario = (int)($_POST['id_usuario'] ?? 0);
 
@@ -123,7 +109,6 @@ if ($accion === 'eliminar') {
         redirigir('usuarios', 'error', 'ID de usuario inválido.');
     }
 
-    // No puede eliminarse a sí mismo
     if (Session::obtenerUsuario()['id_usuario'] == $id_usuario) {
         redirigir('usuarios', 'error', 'No puede eliminar su propia cuenta.');
     }
@@ -136,12 +121,10 @@ if ($accion === 'eliminar') {
     redirigir('usuarios', 'mensaje', 'Usuario eliminado exitosamente.');
 }
 
-// ────────────────────────────────────────────────────────────────
 // CAMBIAR CONTRASEÑA
-// ────────────────────────────────────────────────────────────────
 if ($accion === 'cambiar_password') {
-    $id_usuario        = (int)($_POST['id_usuario'] ?? 0);
-    $password_nuevo    = $_POST['password_nuevo'] ?? '';
+    $id_usuario = (int)($_POST['id_usuario'] ?? 0);
+    $password_nuevo = $_POST['password_nuevo'] ?? '';
     $password_confirmar = $_POST['password_confirmar'] ?? '';
 
     if ($id_usuario <= 0) {
@@ -162,6 +145,4 @@ if ($accion === 'cambiar_password') {
     redirigir('usuarios', 'mensaje', 'Contraseña actualizada exitosamente.');
 }
 
-// Acción desconocida
 redirigir('usuarios', 'error', 'Acción no reconocida.');
-

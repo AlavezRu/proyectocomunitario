@@ -7,7 +7,7 @@ $activePage = "tequios";
 $id_tequio = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id_tequio <= 0) {
-    header("Location: /proyectocomunitariov3/public/index.php?page=tequios&error=invalid_id");
+    header("Location: /proyectocomunitario/public/index.php?page=tequios&error=invalid_id");
     exit;
 }
 
@@ -17,7 +17,7 @@ $result = pg_query_params($conexion, $sql, [$id_tequio]);
 $tequio = pg_fetch_assoc($result);
 
 if (!$tequio) {
-    header("Location: /proyectocomunitariov3/public/index.php?page=tequios&error=not_found");
+    header("Location: /proyectocomunitario/public/index.php?page=tequios&error=not_found");
     exit;
 }
 
@@ -55,11 +55,11 @@ if (!$tequio) {
                     <button type="submit" form="frmEditarTequio" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar Cambios
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=tequios" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
+                    <a href="/proyectocomunitario/public/index.php?page=tequios" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
                 </div>
             </div>
 
-            <form id="frmEditarTequio" action="/proyectocomunitariov3/src/Tequios/Application/editar_tequio.php" method="POST">
+            <form id="frmEditarTequio" action="/proyectocomunitario/src/Tequios/Application/editar_tequio.php" method="POST">
                 <input type="hidden" name="id_tequio" value="<?= $id_tequio ?>">
                 
                 <div class="glass-panel" style="padding: 2rem; max-width: 600px;">

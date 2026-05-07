@@ -371,7 +371,7 @@ switch ($tipo_reporte) {
 
     <div class="no-print" style="margin-bottom: 20px;">
         <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            🖨️ Imprimir Reporte
+            Imprimir Reporte
         </button>
         <button onclick="window.close()" style="padding: 10px 20px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; margin-left: 10px;">
             Cerrar
@@ -380,7 +380,7 @@ switch ($tipo_reporte) {
 
     <div class="header">
         <img
-            src="/proyectocomunitariov3/shared/img/logo.png"
+            src="/proyectocomunitario/shared/img/logo.png"
             alt="Escudo Municipal de San Bartolo Soyaltepec"
             class="header-logo"
         >
@@ -389,7 +389,7 @@ switch ($tipo_reporte) {
             <p><?= $titulo ?> | Generado el: <?= date('d/m/Y H:i') ?></p>
         </div>
         <img
-            src="/proyectocomunitariov3/shared/img/logo.png"
+            src="/proyectocomunitario/shared/img/logo.png"
             alt="Escudo Municipal de San Bartolo Soyaltepec"
             class="header-logo"
         >

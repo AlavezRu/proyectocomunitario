@@ -7,7 +7,7 @@ $activePage = "asambleas";
 $id_asamblea = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id_asamblea <= 0) {
-    header("Location: /proyectocomunitariov3/public/index.php?page=asambleas&error=invalid_id");
+    header("Location: /proyectocomunitario/public/index.php?page=asambleas&error=invalid_id");
     exit;
 }
 
@@ -17,7 +17,7 @@ $result = pg_query_params($conexion, $sql, [$id_asamblea]);
 $asamblea = pg_fetch_assoc($result);
 
 if (!$asamblea) {
-    header("Location: /proyectocomunitariov3/public/index.php?page=asambleas&error=not_found");
+    header("Location: /proyectocomunitario/public/index.php?page=asambleas&error=not_found");
     exit;
 }
 
@@ -55,11 +55,11 @@ if (!$asamblea) {
                     <button type="submit" form="frmEditarAsamblea" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar Cambios
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=asambleas" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
+                    <a href="/proyectocomunitario/public/index.php?page=asambleas" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
                 </div>
             </div>
 
-            <form id="frmEditarAsamblea" action="/proyectocomunitariov3/src/Asambleas/Application/editar_asamblea.php" method="POST">
+            <form id="frmEditarAsamblea" action="/proyectocomunitario/src/Asambleas/Application/editar_asamblea.php" method="POST">
                 <input type="hidden" name="id_asamblea" value="<?= $id_asamblea ?>">
                 
                 <div class="glass-panel" style="padding: 2rem; max-width: 600px;">

@@ -149,7 +149,7 @@ $resultado = pg_query($conexion, $query);
                     <p style="color: var(--text-muted);">Registro de actas y documentos digitalizados</p>
                 </div>
                 <div>
-                    <a href="/proyectocomunitariov3/public/index.php?page=actas_formulario" class="btn btn-primary">
+                    <a href="/proyectocomunitario/public/index.php?page=actas_formulario" class="btn btn-primary">
                         <i class="fas fa-file-signature"></i> Registrar Acta
                     </a>
                 </div>
@@ -181,7 +181,7 @@ $resultado = pg_query($conexion, $query);
                                         </td>
                                         <td style="padding: 1rem 0.5rem; text-align: center;">
                                             <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                                <a href="/proyectocomunitariov3/public/index.php?page=actas_formulario&id=<?= $row['id_acta'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(245, 158, 11, 0.1); color: var(--warning); border-radius: var(--radius-md);" title="Editar">
+                                                <a href="/proyectocomunitario/public/index.php?page=actas_formulario&id=<?= $row['id_acta'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(245, 158, 11, 0.1); color: var(--warning); border-radius: var(--radius-md);" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <button type="button" onclick="abrirModalEliminar('<?= $row['id_acta'] ?>', '<?= htmlspecialchars($row['nombre_completo']) ?>', '<?= date('d/m/Y', strtotime($row['fecha_acta'])) ?>');" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Eliminar">
@@ -206,7 +206,7 @@ $resultado = pg_query($conexion, $query);
                 <?php if ($total_paginas > 1): ?>
                 <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
                     <?php for ($i=1; $i<=$total_paginas; $i++): ?>
-                        <a href="/proyectocomunitariov3/public/index.php?page=actas&p=<?= $i ?>" 
+                        <a href="/proyectocomunitario/public/index.php?page=actas&p=<?= $i ?>" 
                            style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); text-decoration: none; font-weight: 500; font-size: 0.875rem;
                            <?= $i == $pagina_actual ? 'background: var(--primary); color: white; box-shadow: var(--shadow-md);' : 'background: white; border: 1px solid var(--border); color: var(--text-muted);' ?>">
                             <?= $i ?>
@@ -258,7 +258,7 @@ $resultado = pg_query($conexion, $query);
 
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '/proyectocomunitariov3/src/ActasDePosesion/Application/acciones.php';
+            form.action = '/proyectocomunitario/src/ActasDePosesion/Application/acciones.php';
 
             const inputAccion = document.createElement('input');
             inputAccion.type = 'hidden';

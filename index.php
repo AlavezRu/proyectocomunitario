@@ -3,7 +3,7 @@
  * Punto de entrada principal
  * Redirige a public/index.php
  */
-header("Location: /proyectocomunitariov3/public/index.php");
+header("Location: /proyectocomunitario/public/index.php");
 exit;
 ?>
 

@@ -11,15 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $result = pg_query_params($conexion, $sql, [$descripcion, $observacion ?: null, $id_asamblea]);
         
         if ($result) {
-            header("Location: /proyectocomunitariov3/public/index.php?page=asambleas&msg=updated");
+            header("Location: /proyectocomunitario/public/index.php?page=asambleas&msg=updated");
         } else {
-            header("Location: /proyectocomunitariov3/public/index.php?page=asambleas&error=update_failed");
+            header("Location: /proyectocomunitario/public/index.php?page=asambleas&error=update_failed");
         }
     } else {
-        header("Location: /proyectocomunitariov3/public/index.php?page=asambleas&error=invalid_data");
+        header("Location: /proyectocomunitario/public/index.php?page=asambleas&error=invalid_data");
     }
 } else {
-    header("Location: /proyectocomunitariov3/public/index.php?page=asambleas");
+    header("Location: /proyectocomunitario/public/index.php?page=asambleas");
 }
 exit;
 ?>

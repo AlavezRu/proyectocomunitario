@@ -126,11 +126,11 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
                     <button type="submit" form="frmComunero" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar Registro
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=comuneros" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
+                    <a href="/proyectocomunitario/public/index.php?page=comuneros" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
                 </div>
             </div>
 
-            <form id="frmComunero" action="/proyectocomunitariov3/src/Comuneros/Application/acciones.php" method="POST" onsubmit="return validarFormulario();">
+            <form id="frmComunero" action="/proyectocomunitario/src/Comuneros/Application/acciones.php" method="POST" onsubmit="return validarFormulario();">
                 <input type="hidden" name="accion" value="<?= $modo_edicion ? 'editar' : 'nuevo' ?>">
                 <input type="hidden" name="id_comunero" value="<?= $id_comunero ?>">
 

@@ -24,7 +24,7 @@ pg_query($conexion, $create_table);
 // Obtener datos de la asamblea
 $q_asamblea = pg_query_params($conexion, "SELECT * FROM asamblea WHERE id_asamblea = $1", [$id_asamblea]);
 if (pg_num_rows($q_asamblea) == 0) {
-    header("Location: /proyectocomunitariov3/public/index.php?page=asambleas");
+    header("Location: /proyectocomunitario/public/index.php?page=asambleas");
     exit;
 }
 $asamblea = pg_fetch_assoc($q_asamblea);
@@ -106,11 +106,11 @@ $resultado = pg_query($conexion, $query);
                     <button type="submit" form="frmLista" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar Lista
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=asambleas" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Volver</a>
+                    <a href="/proyectocomunitario/public/index.php?page=asambleas" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Volver</a>
                 </div>
             </div>
 
-            <form id="frmLista" action="/proyectocomunitariov3/src/Asambleas/Application/guardar_lista.php" method="POST">
+            <form id="frmLista" action="/proyectocomunitario/src/Asambleas/Application/guardar_lista.php" method="POST">
                 <input type="hidden" name="id_asamblea" value="<?= $id_asamblea ?>">
                 
                 <!-- Buscador y Botones de Acción -->

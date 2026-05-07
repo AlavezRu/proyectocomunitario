@@ -80,12 +80,12 @@ while ($row = pg_fetch_assoc($resultado_roles)) {
                     <button type="submit" form="frmUsuario" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar Usuario
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=usuarios" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
+                    <a href="/proyectocomunitario/public/index.php?page=usuarios" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
                 </div>
             </div>
 
             <div class="glass-panel" style="padding: 2rem; max-width: 600px;">
-                <form id="frmUsuario" action="/proyectocomunitariov3/src/Usuarios/Application/acciones.php" method="POST">
+                <form id="frmUsuario" action="/proyectocomunitario/src/Usuarios/Application/acciones.php" method="POST">
                     <input type="hidden" name="accion" value="<?= $modo ?>">
                     <input type="hidden" name="id_usuario" value="<?= $modo === 'editar' ? (int)$usuarioEditar['id_usuario'] : '' ?>">
 

@@ -11,6 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         pg_query_params($conexion, $sql, [$fecha, $descripcion, $observacion ?: null]);
     }
 }
-header("Location: /proyectocomunitariov3/public/index.php?page=asambleas&msg=success");
+header("Location: /proyectocomunitario/public/index.php?page=asambleas&msg=success");
 exit;
 ?>

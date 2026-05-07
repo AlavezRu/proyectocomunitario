@@ -5,9 +5,9 @@
  */
 
 // Establecer variables globales de rutas
-$GLOBALS['BASE_URL'] = '/proyectocomunitariov3';
-$GLOBALS['ASSETS_URL'] = '/proyectocomunitariov3/src/Shared/Ui';
-$GLOBALS['PUBLIC_URL'] = '/proyectocomunitariov3/public';
+$GLOBALS['BASE_URL'] = '/proyectocomunitario';
+$GLOBALS['ASSETS_URL'] = '/proyectocomunitario/src/Shared/Ui';
+$GLOBALS['PUBLIC_URL'] = '/proyectocomunitario/public';
 
 require_once '../src/Shared/Infrastructure/Auth/check_auth.php';
 require_once '../db/conexion.php';
@@ -44,7 +44,7 @@ if (!isset($pages[$page])) {
 // --- RBAC: módulo de usuarios exclusivo para Administradores ---
 $paginasRestringidasAdmin = ['usuarios', 'usuarios_formulario'];
 if (in_array($page, $paginasRestringidasAdmin, true) && !Session::esAdmin()) {
-    header('Location: /proyectocomunitariov3/public/index.php?page=dashboard&error=' . urlencode('Acceso denegado. No tienes permisos para ver esa sección.'));
+    header('Location: /proyectocomunitario/public/index.php?page=dashboard&error=' . urlencode('Acceso denegado. No tienes permisos para ver esa sección.'));
     exit;
 }
 

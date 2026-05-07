@@ -136,7 +136,7 @@ $totales = pg_fetch_assoc($q_totales);
                                     <td style="padding: 1rem 0.5rem; font-weight: 500;"><?= str_pad($row['numero_progresivo'], 4, '0', STR_PAD_LEFT) ?></td>
                                     <td style="padding: 1rem 0.5rem;"><?= htmlspecialchars($row['nombre_completo']) ?></td>
                                     
-                                    <form action="/proyectocomunitariov3/src/Predial/Application/guardar_pago.php" method="POST">
+                                    <form action="/proyectocomunitario/src/Predial/Application/guardar_pago.php" method="POST">
                                         <input type="hidden" name="id_comunero" value="<?= $row['id_comunero'] ?>">
                                         <input type="hidden" name="anio" value="<?= $anio_filtro ?>">
                                         <td style="padding: 1rem 0.5rem;">
@@ -155,7 +155,7 @@ $totales = pg_fetch_assoc($q_totales);
                                         <td style="padding: 1rem 0.5rem; text-align: center;">
                                             <?php if($row['pagado'] == 't'): ?>
                                                 <!-- Deshacer pago -->
-                                                <button type="button" onclick="if(confirm('¿Deshacer pago?')) window.location.href='/proyectocomunitariov3/src/Predial/Application/deshacer_pago.php?id_pago=<?= $row['id_pago'] ?>&anio=<?= $anio_filtro ?>';" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Eliminar Pago">
+                                                <button type="button" onclick="if(confirm('¿Deshacer pago?')) window.location.href='/proyectocomunitario/src/Predial/Application/deshacer_pago.php?id_pago=<?= $row['id_pago'] ?>&anio=<?= $anio_filtro ?>';" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Eliminar Pago">
                                                     <i class="fas fa-undo"></i>
                                                 </button>
                                             <?php else: ?>

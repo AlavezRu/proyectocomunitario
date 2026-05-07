@@ -37,11 +37,11 @@ $activePage = "tequios";
                     <button type="submit" form="frmTequio" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar Tequio
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=tequios" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
+                    <a href="/proyectocomunitario/public/index.php?page=tequios" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Cancelar</a>
                 </div>
             </div>
 
-            <form id="frmTequio" action="/proyectocomunitariov3/src/Tequios/Application/guardar_tequio.php" method="POST">
+            <form id="frmTequio" action="/proyectocomunitario/src/Tequios/Application/guardar_tequio.php" method="POST">
                 <div class="glass-panel" style="padding: 2rem; max-width: 600px;">
                     <div class="form-group">
                         <label class="form-label">Fecha del Tequio *</label>

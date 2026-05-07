@@ -17,6 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         pg_query_params($conexion, $sql, [$id_comunero, $anio, $monto]);
     }
 }
-header("Location: /proyectocomunitariov3/public/index.php?page=predial&anio=" . $anio . "&msg=paid");
+header("Location: /proyectocomunitario/public/index.php?page=predial&anio=" . $anio . "&msg=paid");
 exit;
 ?>

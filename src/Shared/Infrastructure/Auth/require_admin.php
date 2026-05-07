@@ -3,15 +3,15 @@
  * Guard de acceso exclusivo para Administradores.
  * Incluir este archivo al inicio de cualquier recurso restringido a Admin.
  *
- * - Si el usuario no está autenticado → redirige al login.
- * - Si está autenticado pero no es Admin → responde 403 o redirige al dashboard.
+ * - Si el usuario no está autenticado -> redirige al login.
+ * - Si está autenticado pero no es Admin -> responde 403 o redirige al dashboard.
  */
 require_once __DIR__ . '/Session.php';
 
 Session::iniciar();
 
 if (!Session::estaLogueado()) {
-    header('Location: /proyectocomunitariov3/public/login.php');
+    header('Location: /proyectocomunitario/public/login.php');
     exit;
 }
 
@@ -30,8 +30,8 @@ if (!Session::esAdmin()) {
         exit;
     }
 
-    // Para peticiones normales (GET/POST de formularios) → redirigir al dashboard con mensaje
+    // Para peticiones normales (GET/POST de formularios) -> redirigir al dashboard con mensaje
     http_response_code(403);
-    header('Location: /proyectocomunitariov3/public/index.php?page=dashboard&error=' . urlencode('Acceso denegado. No tienes permisos para ver esa sección.'));
+    header('Location: /proyectocomunitario/public/index.php?page=dashboard&error=' . urlencode('Acceso denegado. No tienes permisos para ver esa sección.'));
     exit;
 }

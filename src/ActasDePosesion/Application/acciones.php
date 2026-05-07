@@ -94,7 +94,7 @@ if ($accion == 'nuevo') {
         }
 
         pg_query($conexion, "COMMIT");
-        header("Location: /proyectocomunitariov3/public/index.php?page=actas&msg=success");
+        header("Location: /proyectocomunitario/public/index.php?page=actas&msg=success");
         exit;
 
     } catch (Exception $e) {
@@ -171,7 +171,7 @@ if ($accion == 'nuevo') {
         }
 
         pg_query($conexion, "COMMIT");
-        header("Location: /proyectocomunitariov3/public/index.php?page=actas&msg=success");
+        header("Location: /proyectocomunitario/public/index.php?page=actas&msg=success");
         exit;
 
     } catch (Exception $e) {
@@ -203,7 +203,7 @@ if ($accion == 'nuevo') {
         if (!$res) throw new Exception("Error al eliminar acta: " . pg_last_error($conexion));
 
         pg_query($conexion, "COMMIT");
-        header("Location: /proyectocomunitariov3/public/index.php?page=actas&msg=deleted");
+        header("Location: /proyectocomunitario/public/index.php?page=actas&msg=deleted");
         exit;
 
     } catch (Exception $e) {
@@ -254,7 +254,7 @@ if ($accion == 'nuevo') {
         exit;
     }
 } else {
-    header("Location: /proyectocomunitariov3/public/index.php?page=actas");
+    header("Location: /proyectocomunitario/public/index.php?page=actas");
     exit;
 }
 ?>

@@ -24,7 +24,7 @@ pg_query($conexion, $create_table);
 // Obtener datos del tequio
 $q_tequio = pg_query_params($conexion, "SELECT * FROM tequio WHERE id_tequio = $1", [$id_tequio]);
 if (pg_num_rows($q_tequio) == 0) {
-    header("Location: /proyectocomunitariov3/public/index.php?page=tequios");
+    header("Location: /proyectocomunitario/public/index.php?page=tequios");
     exit;
 }
 $tequio = pg_fetch_assoc($q_tequio);
@@ -106,16 +106,16 @@ $resultado = pg_query($conexion, $query);
                     <button type="submit" form="frmLista" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar Lista
                     </button>
-                    <a href="/proyectocomunitariov3/public/index.php?page=tequios" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Volver</a>
+                    <a href="/proyectocomunitario/public/index.php?page=tequios" class="btn" style="background: white; border: 1px solid var(--border); margin-left: 0.5rem;">Volver</a>
                 </div>
             </div>
 
-            <form id="frmLista" action="/proyectocomunitariov3/src/Tequios/Application/guardar_lista.php" method="POST">
+            <form id="frmLista" action="/proyectocomunitario/src/Tequios/Application/guardar_lista.php" method="POST">
                 <input type="hidden" name="id_tequio" value="<?= $id_tequio ?>">
                 
                 <!-- Buscador y Botones de Acción -->
                 <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="🔍 Buscar comunero por nombre o número..." style="color: var(--text-main);">
+                    <input type="text" id="searchInput" placeholder="Buscar comunero por nombre o número..." style="color: var(--text-main);">
                     <button type="button" class="btn-action" onclick="marcarTodos()">
                         <i class="fas fa-check-double"></i> Marcar Todos
                     </button>
