@@ -16,17 +16,17 @@ $usuario = Session::obtenerUsuario();
     </div>
 
     <!-- Perfil de usuario -->
-    <div class="sidebar-profile" style="padding: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem;">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); overflow: hidden; display: flex; align-items: center; justify-content: center; background: #f8fafc; flex-shrink: 0;">
-                <img src="/proyectocomunitario/shared/img/logosinfond.png" alt="Escudo" style="width: 32px; height: 32px; object-fit: contain;">
+    <div class="sidebar-profile" style="padding: 0.6rem; border-bottom: 1px solid var(--border); margin-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); overflow: hidden; display: flex; align-items: center; justify-content: center; background: #f8fafc; flex-shrink: 0;">
+                <img src="/proyectocomunitario/shared/img/logosinfond.png" alt="Escudo" style="width: 28px; height: 28px; object-fit: contain;">
             </div>
             <div style="flex: 1; min-width: 0;">
-                <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <div style="font-weight: 600; font-size: 0.78rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     <?= htmlspecialchars($usuario['nombre'] ?? '') ?>
                 </div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">
-                    <span style="background: rgba(37, 99, 235, 0.1); color: var(--primary); padding: 0.2rem 0.4rem; border-radius: 3px;">
+                <div style="font-size: 0.71rem; color: var(--text-muted);">
+                    <span style="background: rgba(37, 99, 235, 0.1); color: var(--primary); padding: 0.15rem 0.3rem; border-radius: 2px;">
                         <?= htmlspecialchars($usuario['nombre_rol'] ?? 'Usuario') ?>
                     </span>
                 </div>
@@ -94,7 +94,7 @@ $usuario = Session::obtenerUsuario();
     </ul>
 
     <!-- Logout -->
-    <div style="padding: 1rem; border-top: 1px solid var(--border); margin-top: auto;">
+    <div style="padding: 0.6rem; border-top: 1px solid var(--border); margin-top: auto;">
         <a href="/proyectocomunitario/public/logout.php" class="nav-link" style="color: var(--danger); background: rgba(239, 68, 68, 0.1); border-radius: 8px; margin: 0;">
             <i class="fas fa-sign-out-alt"></i>
             <span>Cerrar Sesión</span>

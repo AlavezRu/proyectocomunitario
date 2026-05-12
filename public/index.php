@@ -21,6 +21,7 @@ $pages = [
     'comuneros_formulario' => ['file' => '../src/Comuneros/Ui/formulario.php', 'page' => 'comuneros'],
     'actas' => ['file' => '../src/ActasDePosesion/Ui/index.php', 'page' => 'actas'],
     'actas_formulario' => ['file' => '../src/ActasDePosesion/Ui/formulario.php', 'page' => 'actas'],
+    'actas_ver' => ['file' => '../src/ActasDePosesion/Ui/ver.php', 'page' => 'actas'],
     'predial' => ['file' => '../src/Predial/Ui/index.php', 'page' => 'predial'],
     'tequios' => ['file' => '../src/Tequios/Ui/index.php', 'page' => 'tequios'],
     'tequios_formulario' => ['file' => '../src/Tequios/Ui/formulario_tequio.php', 'page' => 'tequios'],

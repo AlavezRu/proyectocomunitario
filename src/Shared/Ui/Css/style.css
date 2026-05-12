@@ -65,7 +65,7 @@ body {
     left: 0;
     background: var(--surface);
     border-right: 1px solid var(--border);
-    padding: 2rem 1.5rem;
+    padding: 1.25rem 1rem;
     display: flex;
     flex-direction: column;
     z-index: 100;
@@ -73,18 +73,18 @@ body {
 }
 
 .sidebar-brand {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--primary);
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.25rem;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
 }
 
 .sidebar-logo {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
     flex-shrink: 0;
 }
@@ -93,7 +93,7 @@ body {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.35rem;
 }
 
 .nav-item {
@@ -103,13 +103,14 @@ body {
 .nav-link {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.875rem 1rem;
+    gap: 0.85rem;
+    padding: 0.7rem 0.8rem;
     color: var(--text-muted);
     text-decoration: none;
     font-weight: 500;
     border-radius: var(--radius-md);
     transition: var(--transition-fast);
+    font-size: 0.92rem;
 }
 
 .nav-link:hover, .nav-link.active {
@@ -120,7 +121,7 @@ body {
 }
 
 .nav-link i {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
 }
 
 /* Main Content Area */
