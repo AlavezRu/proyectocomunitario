@@ -27,6 +27,35 @@ if ($id_acta) {
 
 // Listar comuneros activos para el select
 $q_comuneros = pg_query($conexion, "SELECT id_comunero, numero_progresivo, nombre_completo FROM comunero WHERE activo = TRUE ORDER BY nombre_completo");
+
+// Obtener Puntos y Polígonos desde PostGIS (igual que el mapa principal)
+$query_marcadores = "
+    SELECT a.id_acta, a.descripcion_predio, a.fecha_acta, c.nombre_completo, c.numero_progresivo, c.color_mapa,
+           ST_AsGeoJSON(a.ubicacion) AS geojson
+    FROM acta_posesion a
+    JOIN comunero c ON a.id_comunero = c.id_comunero
+    WHERE a.ubicacion IS NOT NULL
+    ORDER BY a.fecha_acta DESC
+";
+
+$resultado_marcadores = pg_query($conexion, $query_marcadores);
+if (!$resultado_marcadores) {
+    die("Error en query: " . pg_last_error($conexion));
+}
+
+$marcadores = [];
+while ($row = pg_fetch_assoc($resultado_marcadores)) {
+    $marcadores[] = $row;
+}
+
+// Obtener lista de localidades
+$q_localidades = pg_query($conexion, "SELECT id_localidad, nombre FROM localidad ORDER BY nombre");
+$localidades_mapa = [];
+if ($q_localidades) {
+    while ($row = pg_fetch_assoc($q_localidades)) {
+        $localidades_mapa[] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -102,6 +131,71 @@ $q_comuneros = pg_query($conexion, "SELECT id_comunero, numero_progresivo, nombr
         .leaflet-control-draw a:hover { background: #f0f0f0; }
         .leaflet-control-draw a.leaflet-draw-edit-edit { background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17.25V21h3.75L17.81 9.94m-6.75-6.75l2.5-2.5a2.828 2.828 0 114 0l2.5 2.5m-7.5 7.5L8.4 9.94"/></svg>') center no-repeat; background-size: 20px; }
         .leaflet-control-draw a.leaflet-draw-create-polygon { background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l6 6m0 0l6-6m-6 6l-6 6m6-6l6 6m-6-6v12"/></svg>') center no-repeat; background-size: 20px; }
+        .localidades-control {
+            background: var(--surface, #fff);
+            border-radius: var(--radius-md, 8px);
+            padding: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            min-width: 155px;
+        }
+        .localidades-control-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted, #64748b);
+            padding: 0 0.25rem 0.25rem;
+            border-bottom: 1px solid var(--border, #e2e8f0);
+            margin-bottom: 0.15rem;
+        }
+        .localidad-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            width: 100%;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.82rem;
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: 6px;
+            background: var(--surface, #fff);
+            color: var(--text, #1e293b);
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .localidad-btn:hover:not(:disabled) {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #93c5fd;
+        }
+        .localidad-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .localidad-btn i {
+            font-size: 0.75rem;
+            color: #3b82f6;
+            flex-shrink: 0;
+        }
+        .localidad-btn:disabled i {
+            color: var(--text-muted, #94a3b8);
+        }
+        .info-popup h4 { 
+            margin-top: 0; 
+            color: var(--primary); 
+            font-size: 1rem; 
+            margin-bottom: 0.5rem; 
+        }
+        .info-popup p { 
+            margin: 0.25rem 0; 
+            font-size: 0.85rem; 
+            color: var(--text-muted); 
+        }
         @media (max-width: 768px) { 
             .grid-2 { grid-template-columns: 1fr; } 
             .modal-content { width: 95vw; }
@@ -595,13 +689,166 @@ $q_comuneros = pg_query($conexion, "SELECT id_comunero, numero_progresivo, nombr
             console.log('Mapa creado:', map);
             console.log('Zoom:', map.getZoom(), 'Centro:', map.getCenter());
             
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            // Definir múltiples capas como en el mapa principal
+            const capaCalles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19
-            }).addTo(map);
-            console.log('Capa base (tiles) agregada');
+            });
 
-            // Crear feature group para los puntos y líneas
+            const capaTopografica = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)',
+                maxZoom: 17
+            });
+
+            const capaSatelital = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles © Esri',
+                maxZoom: 19
+            });
+
+            const capaEtiquetas = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Labels © Esri',
+                maxZoom: 19
+            });
+
+            const capaHibrida = L.layerGroup([capaSatelital, capaEtiquetas]);
+
+            capaCalles.addTo(map);
+
+            L.control.layers({
+                'Calles (OSM)': capaCalles,
+                'Topografica': capaTopografica,
+                'Satelital': capaSatelital,
+                'Hibrida (Satelital + etiquetas)': capaHibrida
+            }, null, {
+                position: 'topleft',
+                collapsed: false
+            }).addTo(map);
+            
+            console.log('Capas de mapa agregadas');
+
+            // Oscurecer color para el borde
+            function oscurecerColor(color) {
+                const num = parseInt(color.slice(1), 16);
+                const amt = -30;
+                const R = Math.max(0, (num >> 16) + amt);
+                const G = Math.max(0, (num >> 8 & 0x00FF) + amt);
+                const B = Math.max(0, (num & 0x0000FF) + amt);
+                return '#' + (0x1000000 + (R < 255 ? R : 255) * 0x10000 + (G < 255 ? G : 255) * 0x100 + (B < 255 ? B : 255)).toString(16).slice(1);
+            }
+
+            // Crear layer para predios existentes
+            let geoJsonLayer = L.geoJSON(null, {
+                style: function(feature) {
+                    const colorUsuario = feature.properties.color_mapa || '#3b82f6';
+                    return {
+                        color: oscurecerColor(colorUsuario),
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.3,
+                        fillColor: colorUsuario
+                    };
+                },
+                pointToLayer: function(feature, latlng) {
+                    const colorUsuario = feature.properties.color_mapa || '#3b82f6';
+                    return L.circleMarker(latlng, {
+                        radius: 6,
+                        fillColor: colorUsuario,
+                        color: oscurecerColor(colorUsuario),
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    const popup = `
+                        <div class="info-popup">
+                            <h4>${props.nombre}</h4>
+                            <p><strong>Predio:</strong> ${props.predio || 'N/A'}</p>
+                            <p><strong>Fecha:</strong> ${props.fecha || 'N/A'}</p>
+                            <p><strong>Progresivo:</strong> ${props.progresivo || 'N/A'}</p>
+                        </div>
+                    `;
+                    layer.bindPopup(popup);
+                }
+            }).addTo(map);
+
+            // Agregar marcadores de predios existentes
+            const marcadores = <?php echo json_encode($marcadores, JSON_UNESCAPED_UNICODE); ?>;
+            marcadores.forEach((marcador, index) => {
+                try {
+                    const geojson = JSON.parse(marcador.geojson);
+                    if (geojson && geojson.type) {
+                        const feature = {
+                            type: 'Feature',
+                            geometry: geojson,
+                            properties: {
+                                nombre: marcador.nombre_completo,
+                                predio: marcador.descripcion_predio,
+                                fecha: marcador.fecha_acta,
+                                progresivo: marcador.numero_progresivo,
+                                color_mapa: marcador.color_mapa
+                            }
+                        };
+                        geoJsonLayer.addData(feature);
+                    }
+                } catch(e) {
+                    console.error('Error procesando marcador:', e);
+                }
+            });
+            
+            console.log('Marcadores de predios existentes agregados');
+
+            // Coordenadas fijas por comunidad
+            const coordenadasComunidades = {
+                'gavillera':        [17.609956445951376, -97.27334527452484],
+                'soyatepec':        [17.59245671490403,  -97.30955349838028],
+                'la union reforma': [17.580575784419143, -97.28478471527424],
+                'tejocotal':        [17.599406174103784, -97.28524531812714],
+                'rio verde':        [17.570968820630586, -97.3046363469873]
+            };
+
+            function normalizarNombre(nombre) {
+                return nombre.toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .trim();
+            }
+
+            // Control de comunidades (top-right)
+            const LocalidadesControl = L.Control.extend({
+                options: { position: 'topright' },
+                onAdd: function(map) {
+                    const container = L.DomUtil.create('div', 'localidades-control');
+                    L.DomEvent.disableClickPropagation(container);
+                    L.DomEvent.disableScrollPropagation(container);
+
+                    const title = L.DomUtil.create('div', 'localidades-control-title', container);
+                    title.innerHTML = '<i class="fas fa-map-marked-alt" style="margin-right:0.3rem"></i> Comunidades';
+
+                    const localidades = <?php echo json_encode($localidades_mapa, JSON_UNESCAPED_UNICODE); ?>;
+                    localidades.forEach(function(loc) {
+                        const btn = L.DomUtil.create('button', 'localidad-btn', container);
+                        btn.innerHTML = '<i class="fas fa-location-dot"></i> ' + loc.nombre;
+
+                        const coords = coordenadasComunidades[normalizarNombre(loc.nombre)];
+                        if (coords) {
+                            L.DomEvent.on(btn, 'click', function() {
+                                map.flyTo(coords, 15, { duration: 1 });
+                            });
+                        } else {
+                            btn.disabled = true;
+                            btn.title = 'Sin coordenadas definidas';
+                        }
+                    });
+
+                    return container;
+                }
+            });
+            new LocalidadesControl().addTo(map);
+            
+            console.log('Control de localidades agregado');
+
+            // Crear feature group para los puntos y líneas del nuevo polígono
             poligonoLayer = L.featureGroup().addTo(map);
             console.log('Feature group creado');
 

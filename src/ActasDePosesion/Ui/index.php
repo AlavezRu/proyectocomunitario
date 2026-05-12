@@ -181,6 +181,9 @@ $resultado = pg_query($conexion, $query);
                                         </td>
                                         <td style="padding: 1rem 0.5rem; text-align: center;">
                                             <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                                <a href="/proyectocomunitario/public/index.php?page=actas_ver&id=<?= $row['id_acta'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(16, 185, 129, 0.1); color: var(--secondary); border-radius: var(--radius-md);" title="Ver Información">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
                                                 <a href="/proyectocomunitario/public/index.php?page=actas_formulario&id=<?= $row['id_acta'] ?>" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(245, 158, 11, 0.1); color: var(--warning); border-radius: var(--radius-md);" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>

@@ -121,6 +121,19 @@ if ($q_localidades) {
         .localidad-btn:disabled i {
             color: var(--text-muted, #94a3b8);
         }
+        .leaflet-control-layers {
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: var(--radius-md, 8px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .leaflet-control-layers-expanded {
+            background: var(--surface, #fff);
+            color: var(--text, #1e293b);
+            font-size: 0.82rem;
+            line-height: 1.3;
+            min-width: 180px;
+        }
     </style>
 </head>
 <body>
@@ -154,10 +167,39 @@ if ($q_localidades) {
 
         // Inicializar mapa
         const map = L.map('map').setView([17.5689, -97.3295], 13);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+        const capaCalles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
+        });
+
+        const capaTopografica = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)',
+            maxZoom: 17
+        });
+
+        const capaSatelital = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles © Esri',
+            maxZoom: 19
+        });
+
+        const capaEtiquetas = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Labels © Esri',
+            maxZoom: 19
+        });
+
+        const capaHibrida = L.layerGroup([capaSatelital, capaEtiquetas]);
+
+        capaCalles.addTo(map);
+
+        L.control.layers({
+            'Calles (OSM)': capaCalles,
+            'Topografica': capaTopografica,
+            'Satelital': capaSatelital,
+            'Hibrida (Satelital + etiquetas)': capaHibrida
+        }, null, {
+            position: 'topleft',
+            collapsed: false
         }).addTo(map);
 
         // Oscurecer color para el borde
@@ -280,21 +322,15 @@ if ($q_localidades) {
         });
         new LocalidadesControl().addTo(map);
 
-        // Inicializar cuando el documento esté listo
-        document.addEventListener('DOMContentLoaded', function() {
+        function inicializarMapa() {
             crearGeoJsonLayer();
             agregarDatosAlMapa();
-        });
+        }
 
-        // Por si carga antes que DOM
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                crearGeoJsonLayer();
-                agregarDatosAlMapa();
-            });
+            document.addEventListener('DOMContentLoaded', inicializarMapa);
         } else {
-            crearGeoJsonLayer();
-            agregarDatosAlMapa();
+            inicializarMapa();
         }
     </script>
 </body>

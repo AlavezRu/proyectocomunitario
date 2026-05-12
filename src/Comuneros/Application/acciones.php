@@ -14,6 +14,9 @@ if ($accion == 'nuevo' || $accion == 'editar') {
     $numero_certificado = empty(trim($_POST['numero_certificado'])) ? null : trim($_POST['numero_certificado']);
     $lugar_residencia = trim($_POST['lugar_residencia']);
     $telefono = empty(trim($_POST['telefono'])) ? null : trim($_POST['telefono']);
+    $observaciones = trim($_POST['observaciones'] ?? '');
+    $color_mapa = trim($_POST['color_mapa'] ?? '#3b82f6');
+    $sucesores = $_POST['sucesores'] ?? [];
 
     pg_query($conexion, "BEGIN");
 
