@@ -6,6 +6,9 @@ ob_start();
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../../Shared/Infrastructure/Database/Connection.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Auth/Session.php';
+
+Session::iniciar();
 
 $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 $isAjax = !empty($_POST['ajax']);
@@ -153,6 +156,103 @@ if ($accion == 'nuevo' || $accion == 'editar') {
     }
     header("Location: /proyectocomunitario/public/index.php?page=comuneros&tab=inactivos&msg=reactivated");
     exit;
+} elseif ($accion == 'eliminar_total') {
+    if (!Session::esAdmin()) {
+        http_response_code(403);
+        header("Location: /proyectocomunitario/public/index.php?page=comuneros&tab=inactivos&error=" . urlencode('Acceso denegado. Solo administradores pueden eliminar definitivamente.'));
+        exit;
+    }
+
+    $id_comunero = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+    if ($id_comunero <= 0) {
+        header("Location: /proyectocomunitario/public/index.php?page=comuneros&tab=inactivos&error=" . urlencode('ID de comunero no valido.'));
+        exit;
+    }
+
+    pg_query($conexion, "BEGIN");
+
+    try {
+        $res_comunero = pg_query_params(
+            $conexion,
+            "SELECT id_comunero, activo FROM comunero WHERE id_comunero = $1 FOR UPDATE",
+            [$id_comunero]
+        );
+
+        if (!$res_comunero || pg_num_rows($res_comunero) === 0) {
+            throw new Exception('El comunero no existe.');
+        }
+
+        $comunero = pg_fetch_assoc($res_comunero);
+        if ($comunero['activo'] === 't') {
+            throw new Exception('Solo se puede eliminar definitivamente un comunero inactivo.');
+        }
+
+        // Eliminar archivos fisicos vinculados a actas del comunero
+        $res_rutas_archivos = pg_query_params(
+            $conexion,
+            "SELECT ar.ruta_archivo
+             FROM archivo ar
+             JOIN acta_posesion a ON a.id_acta = ar.id_acta
+             WHERE a.id_comunero = $1",
+            [$id_comunero]
+        );
+        if ($res_rutas_archivos === false) {
+            throw new Exception('No fue posible obtener archivos de actas del comunero.');
+        }
+
+        while ($archivo = pg_fetch_assoc($res_rutas_archivos)) {
+            $rutaFisica = __DIR__ . '/../../../' . $archivo['ruta_archivo'];
+            if (is_file($rutaFisica)) {
+                @unlink($rutaFisica);
+            }
+        }
+
+        // Eliminar metadatos de archivos relacionados
+        $res_delete_archivos = pg_query_params(
+            $conexion,
+            "DELETE FROM archivo ar
+             USING acta_posesion a
+             WHERE ar.id_acta = a.id_acta
+               AND a.id_comunero = $1",
+            [$id_comunero]
+        );
+        if ($res_delete_archivos === false) {
+            throw new Exception('No fue posible eliminar archivos vinculados al comunero.');
+        }
+
+        // Eliminar actas de posesion relacionadas al comunero
+        $res_delete_actas = pg_query_params($conexion, "DELETE FROM acta_posesion WHERE id_comunero = $1", [$id_comunero]);
+        if ($res_delete_actas === false) {
+            throw new Exception('No fue posible eliminar actas vinculadas al comunero.');
+        }
+
+        // Limpiar datos dependientes
+        if (pg_query_params($conexion, "DELETE FROM pago_predial WHERE id_comunero = $1", [$id_comunero]) === false) {
+            throw new Exception('No fue posible eliminar pagos de predial del comunero.');
+        }
+        if (pg_query_params($conexion, "DELETE FROM cumplimiento_tequio WHERE id_comunero = $1", [$id_comunero]) === false) {
+            throw new Exception('No fue posible eliminar cumplimiento de tequios del comunero.');
+        }
+        if (pg_query_params($conexion, "DELETE FROM asistencia_asamblea WHERE id_comunero = $1", [$id_comunero]) === false) {
+            throw new Exception('No fue posible eliminar asistencias de asambleas del comunero.');
+        }
+        if (pg_query_params($conexion, "DELETE FROM sucesor WHERE id_comunero = $1", [$id_comunero]) === false) {
+            throw new Exception('No fue posible eliminar sucesores del comunero.');
+        }
+
+        $res_delete = pg_query_params($conexion, "DELETE FROM comunero WHERE id_comunero = $1", [$id_comunero]);
+        if (!$res_delete) {
+            throw new Exception('No fue posible eliminar el comunero.');
+        }
+
+        pg_query($conexion, "COMMIT");
+        header("Location: /proyectocomunitario/public/index.php?page=comuneros&tab=inactivos&msg=deleted_total");
+        exit;
+    } catch (Exception $e) {
+        pg_query($conexion, "ROLLBACK");
+        header("Location: /proyectocomunitario/public/index.php?page=comuneros&tab=inactivos&error=" . urlencode($e->getMessage()));
+        exit;
+    }
 } else {
     header("Location: /proyectocomunitario/public/index.php?page=comuneros");
     exit;

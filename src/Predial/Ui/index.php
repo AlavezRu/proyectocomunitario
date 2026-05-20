@@ -31,6 +31,12 @@ $q_totales = pg_query($conexion, "
 ");
 $totales = pg_fetch_assoc($q_totales);
 
+$total_comuneros = (int)($totales['total_comuneros'] ?? 0);
+$total_pagados = (int)($totales['total_pagados'] ?? 0);
+$total_recaudado = (float)($totales['total_recaudado'] ?? 0);
+$porcentaje_pagados = $total_comuneros > 0 ? round(($total_pagados / $total_comuneros) * 100) : 0;
+$total_adeudo = $total_comuneros - $total_pagados;
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -90,28 +96,28 @@ $totales = pg_fetch_assoc($q_totales);
                     <div class="stat-icon primary" style="width: 50px; height: 50px; font-size: 1.25rem;"><i class="fas fa-users"></i></div>
                     <div class="stat-info">
                         <h3 style="font-size: 0.75rem;">Total Padron</h3>
-                        <div class="stat-value" style="font-size: 1.5rem;"><?= number_format($totales['total_comuneros']) ?></div>
+                        <div class="stat-value" style="font-size: 1.5rem;"><?= number_format($total_comuneros) ?></div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card" style="padding: 1.25rem;">
                     <div class="stat-icon success" style="width: 50px; height: 50px; font-size: 1.25rem;"><i class="fas fa-check-circle"></i></div>
                     <div class="stat-info">
                         <h3 style="font-size: 0.75rem;">Han Pagado</h3>
-                        <div class="stat-value" style="font-size: 1.5rem;"><?= number_format($totales['total_pagados']) ?> <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">(<?= round(($totales['total_pagados']/$totales['total_comuneros'])*100) ?>%)</span></div>
+                        <div class="stat-value" style="font-size: 1.5rem;"><?= number_format($total_pagados) ?> <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">(<?= $porcentaje_pagados ?>%)</span></div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card" style="padding: 1.25rem;">
                     <div class="stat-icon danger" style="width: 50px; height: 50px; font-size: 1.25rem;"><i class="fas fa-exclamation-circle"></i></div>
                     <div class="stat-info">
                         <h3 style="font-size: 0.75rem;">Con Adeudo</h3>
-                        <div class="stat-value" style="font-size: 1.5rem;"><?= number_format($totales['total_comuneros'] - $totales['total_pagados']) ?></div>
+                        <div class="stat-value" style="font-size: 1.5rem;"><?= number_format($total_adeudo) ?></div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card" style="padding: 1.25rem;">
                     <div class="stat-icon warning" style="width: 50px; height: 50px; font-size: 1.25rem;"><i class="fas fa-money-bill-wave"></i></div>
                     <div class="stat-info">
                         <h3 style="font-size: 0.75rem;">Recaudado</h3>
-                        <div class="stat-value" style="font-size: 1.5rem;">$<?= number_format($totales['total_recaudado'], 2) ?></div>
+                        <div class="stat-value" style="font-size: 1.5rem;">$<?= number_format($total_recaudado, 2) ?></div>
                     </div>
                 </div>
             </div>
