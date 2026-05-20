@@ -112,7 +112,7 @@ $participacion_tequios = pg_fetch_result($q_participacion_tequios, 0, 0) ?: 0;
 
                 <div class="glass-panel stat-card">
                     <div class="stat-icon success">
-                        <i class="fas fa-users-alt"></i>
+                        <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-info">
                         <h3>Total de Habitantes</h3>
@@ -191,7 +191,7 @@ $participacion_tequios = pg_fetch_result($q_participacion_tequios, 0, 0) ?: 0;
 
                 <div class="glass-panel stat-card">
                     <div class="stat-icon success">
-                        <i class="fas fa-users-strong"></i>
+                        <i class="fas fa-people-group"></i>
                     </div>
                     <div class="stat-info">
                         <h3>Participaciones en Tequios</h3>

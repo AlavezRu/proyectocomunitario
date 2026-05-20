@@ -1,10 +1,12 @@
 <?php
 require_once '../../Shared/Infrastructure/Database/Connection.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Auth/Session.php';
 
 /** @var \PgSql\Connection $conexion */
 
 $pageTitle = "Tequios Comunales";
 $activePage = "tequios";
+$esAdmin = Session::esAdmin();
 
 // Crear tabla si no existe
 $create_table = "
@@ -218,10 +220,12 @@ $q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento
                                             <a href="/proyectocomunitario/public/index.php?page=tequios_pase_lista&id=<?= $row['id_tequio'] ?>" class="btn" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; background: rgba(16, 185, 129, 0.1); color: var(--secondary); border-radius: var(--radius-md);" title="Pase de Lista">
                                                 <i class="fas fa-clipboard-check"></i> Lista
                                             </a>
-                                            <!-- Eliminar -->
-                                            <button type="button" onclick="abrirModalEliminarTequio('<?= $row['id_tequio'] ?>', '<?= htmlspecialchars($row['descripcion'], ENT_QUOTES) ?>', '<?= date('d/m/Y', strtotime($row['fecha'])) ?>');" class="btn" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Eliminar Tequio">
-                                                <i class="fas fa-trash"></i> Eliminar
-                                            </button>
+                                            <?php if ($esAdmin): ?>
+                                                <!-- Eliminar -->
+                                                <button type="button" onclick="abrirModalEliminarTequio('<?= $row['id_tequio'] ?>', '<?= htmlspecialchars($row['descripcion'], ENT_QUOTES) ?>', '<?= date('d/m/Y', strtotime($row['fecha'])) ?>');" class="btn" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Eliminar Tequio">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -253,6 +257,7 @@ $q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento
         </div>
     </main>
 
+    <?php if ($esAdmin): ?>
     <div id="modalEliminarTequio" class="modal-delete">
         <div class="modal-delete-content">
             <div class="modal-delete-header">
@@ -281,7 +286,9 @@ $q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
+    <?php if ($esAdmin): ?>
     <script>
         let idTequioEliminar = null;
 
@@ -314,5 +321,6 @@ $q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento
             }
         });
     </script>
+    <?php endif; ?>
 </body>
 </html>
