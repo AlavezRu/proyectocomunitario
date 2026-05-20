@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../Shared/Infrastructure/Database/Connection.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Auth/require_admin.php';
 
 $id_asamblea = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 

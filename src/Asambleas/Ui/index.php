@@ -1,10 +1,12 @@
 <?php
 require_once '../../Shared/Infrastructure/Database/Connection.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Auth/Session.php';
 
 /** @var \PgSql\Connection $conexion */
 
 $pageTitle = "Asambleas Comunales";
 $activePage = "asambleas";
+$esAdmin = Session::esAdmin();
 
 // Crear tabla si no existe
 $create_table = "
@@ -217,10 +219,12 @@ $q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia
                                             <a href="/proyectocomunitario/public/index.php?page=asambleas_pase_lista&id=<?= $row['id_asamblea'] ?>" class="btn" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; background: rgba(37, 99, 235, 0.1); color: var(--primary); border-radius: var(--radius-md);" title="Pase de Lista">
                                                 <i class="fas fa-users-cog"></i> Pase Lista
                                             </a>
-                                            <!-- Eliminar -->
-                                            <button type="button" onclick="abrirModalEliminarAsamblea('<?= $row['id_asamblea'] ?>', '<?= htmlspecialchars($row['descripcion'], ENT_QUOTES) ?>', '<?= date('d/m/Y', strtotime($row['fecha'])) ?>');" class="btn" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Eliminar Asamblea">
-                                                <i class="fas fa-trash"></i> Eliminar
-                                            </button>
+                                            <?php if ($esAdmin): ?>
+                                                <!-- Eliminar -->
+                                                <button type="button" onclick="abrirModalEliminarAsamblea('<?= $row['id_asamblea'] ?>', '<?= htmlspecialchars($row['descripcion'], ENT_QUOTES) ?>', '<?= date('d/m/Y', strtotime($row['fecha'])) ?>');" class="btn" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Eliminar Asamblea">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -252,6 +256,7 @@ $q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia
         </div>
     </main>
 
+    <?php if ($esAdmin): ?>
     <div id="modalEliminarAsamblea" class="modal-delete">
         <div class="modal-delete-content">
             <div class="modal-delete-header">
@@ -280,7 +285,9 @@ $q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
+    <?php if ($esAdmin): ?>
     <script>
         let idAsambleaEliminar = null;
 
@@ -313,5 +320,6 @@ $q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia
             }
         });
     </script>
+    <?php endif; ?>
 </body>
 </html>
