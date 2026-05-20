@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/../../Shared/Infrastructure/Database/Connection.php';
 
+$anio = isset($_POST['anio']) ? (int) $_POST['anio'] : (int) date('Y');
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id_comunero = (int)$_POST['id_comunero'];
-    $anio = (int)$_POST['anio'];
     $monto = (float)$_POST['monto'];
 
     if ($id_comunero > 0 && $anio > 0 && $monto > 0) {

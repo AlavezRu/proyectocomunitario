@@ -1,6 +1,8 @@
 <?php
 require_once '../../Shared/Infrastructure/Database/Connection.php';
 
+/** @var \PgSql\Connection $conexion */
+
 $pageTitle = "Dashboard Principal";
 $activePage = "dashboard";
 $anio_actual = date('Y');

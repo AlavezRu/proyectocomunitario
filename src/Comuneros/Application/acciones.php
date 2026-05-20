@@ -1,7 +1,14 @@
 <?php
+// Iniciar buffer de output para evitar que warnings/notices rompan el JSON
+ob_start();
+
+// Definir header antes de cualquier include
+header('Content-Type: application/json; charset=utf-8');
+
 require_once __DIR__ . '/../../Shared/Infrastructure/Database/Connection.php';
 
 $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
+$isAjax = !empty($_POST['ajax']);
 
 if ($accion == 'nuevo' || $accion == 'editar') {
     // Recibir datos principales
@@ -21,6 +28,42 @@ if ($accion == 'nuevo' || $accion == 'editar') {
     pg_query($conexion, "BEGIN");
 
     try {
+        // Validar telefono: solo numeros y exactamente 10 digitos (si se captura)
+        if (!empty($telefono) && !preg_match('/^\d{10}$/', $telefono)) {
+            throw new Exception("⚠️ El telefono debe tener exactamente 10 numeros.");
+        }
+
+        // Validar que el certificado no sea duplicado
+        if (!empty($numero_certificado)) {
+            $query_cert = "SELECT id_comunero, nombre_completo FROM comunero WHERE numero_certificado = $1";
+            if ($accion == 'editar') {
+                $query_cert .= " AND id_comunero != $2";
+                $res_cert = pg_query_params($conexion, $query_cert, [$numero_certificado, $id_comunero]);
+            } else {
+                $res_cert = pg_query_params($conexion, $query_cert, [$numero_certificado]);
+            }
+            
+            if (pg_num_rows($res_cert) > 0) {
+                throw new Exception("⚠️ El número de certificado '{$numero_certificado}' ya está registrado en el sistema.");
+            }
+        }
+
+        // Validar que el número R.A.N. no sea duplicado
+        if (!empty($numero_ran)) {
+            $query_ran = "SELECT id_comunero, nombre_completo FROM comunero WHERE numero_ran = $1";
+            if ($accion == 'editar') {
+                $query_ran .= " AND id_comunero != $2";
+                $res_ran = pg_query_params($conexion, $query_ran, [$numero_ran, $id_comunero]);
+            } else {
+                $res_ran = pg_query_params($conexion, $query_ran, [$numero_ran]);
+            }
+            
+            if (pg_num_rows($res_ran) > 0) {
+                $row_ran = pg_fetch_assoc($res_ran);
+                throw new Exception("⚠️ El número R.A.N. '{$numero_ran}' ya está registrado a nombre de: " . htmlspecialchars($row_ran['nombre_completo']));
+            }
+        }
+
         // Validar que el color no esté en uso por otro comunero
         $query_color = "SELECT id_comunero, nombre_completo FROM comunero WHERE color_mapa = $1";
         if ($accion == 'editar') {
@@ -32,15 +75,16 @@ if ($accion == 'nuevo' || $accion == 'editar') {
         
         if (pg_num_rows($res_color) > 0) {
             $row_color = pg_fetch_assoc($res_color);
-            throw new Exception("El color ya está siendo usado por: " . htmlspecialchars($row_color['nombre_completo']));
+            throw new Exception("🎨 El color ya está siendo usado por: " . htmlspecialchars($row_color['nombre_completo']));
         }
+
         if ($accion == 'nuevo') {
             // Insertar comunero
             $sql = "INSERT INTO comunero (numero_progresivo, nombre_completo, id_situacion, id_localidad, numero_ran, numero_certificado, lugar_residencia, telefono, observaciones, color_mapa) 
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id_comunero";
             $res = pg_query_params($conexion, $sql, [$numero_progresivo, $nombre_completo, $id_situacion, $id_localidad, $numero_ran, $numero_certificado, $lugar_residencia, $telefono, $observaciones, $color_mapa]);
             
-            if (!$res) throw new Exception("Error al insertar comunero: " . pg_last_error($conexion));
+            if (!$res) throw new Exception("❌ Error al insertar comunero: " . pg_last_error($conexion));
             $id_comunero = pg_fetch_result($res, 0, 0);
 
         } else {
@@ -51,17 +95,16 @@ if ($accion == 'nuevo' || $accion == 'editar') {
                     WHERE id_comunero = $11";
             $res = pg_query_params($conexion, $sql, [$numero_progresivo, $nombre_completo, $id_situacion, $id_localidad, $numero_ran, $numero_certificado, $lugar_residencia, $telefono, $observaciones, $color_mapa, $id_comunero]);
             
-            if (!$res) throw new Exception("Error al actualizar comunero.");
+            if (!$res) throw new Exception("❌ Error al actualizar comunero: " . pg_last_error($conexion));
             
             // Borrar sucesores actuales para insertar los que vienen en el form
-            // (En un entorno real evaluaríamos updates vs deletes, pero borrado lógico o real de sucesores es más simple para listas dinámicas si no hay FKs sensibles)
             pg_query_params($conexion, "DELETE FROM sucesor WHERE id_comunero = $1", [$id_comunero]);
         }
 
         // Insertar sucesores
         foreach ($sucesores as $s) {
-            $nombre = trim($s['nombre']);
-            $parentesco = trim($s['parentesco']);
+            $nombre = trim($s['nombre'] ?? '');
+            $parentesco = trim($s['parentesco'] ?? '');
             if (!empty($nombre)) {
                 $sql_suc = "INSERT INTO sucesor (id_comunero, nombre_sucesor, parentesco) VALUES ($1, $2, $3)";
                 pg_query_params($conexion, $sql_suc, [$id_comunero, $nombre, $parentesco]);
@@ -69,12 +112,32 @@ if ($accion == 'nuevo' || $accion == 'editar') {
         }
 
         pg_query($conexion, "COMMIT");
-        header("Location: /proyectocomunitario/public/index.php?page=comuneros&msg=success");
+        
+        if ($isAjax) {
+            ob_end_clean();
+            echo json_encode([
+                'success' => true,
+                'message' => $accion == 'nuevo' ? '✅ Comunero registrado exitosamente' : '✅ Comunero actualizado exitosamente'
+            ]);
+        } else {
+            header("Location: /proyectocomunitario/public/index.php?page=comuneros&msg=success");
+        }
         exit;
 
     } catch (Exception $e) {
         pg_query($conexion, "ROLLBACK");
-        die("Error procesando solicitud: " . $e->getMessage());
+        
+        if ($isAjax) {
+            ob_end_clean();
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        } else {
+            die("Error procesando solicitud: " . $e->getMessage());
+        }
+        exit;
     }
 } elseif ($accion == 'desactivar') {
     $id_comunero = isset($_GET['id']) ? (int)$_GET['id'] : 0;
