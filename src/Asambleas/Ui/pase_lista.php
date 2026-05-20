@@ -1,6 +1,8 @@
 <?php
 require_once '../../Shared/Infrastructure/Database/Connection.php';
 
+/** @var \PgSql\Connection $conexion */
+
 $id_asamblea = isset($_GET['id_asamblea']) ? (int)$_GET['id_asamblea'] : (isset($_GET['id']) ? (int)$_GET['id'] : 0);
 
 $pageTitle = "Pase de Lista - Asamblea";

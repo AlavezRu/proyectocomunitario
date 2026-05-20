@@ -1,6 +1,8 @@
 <?php
 require_once '../../Shared/Infrastructure/Database/Connection.php';
 
+/** @var \PgSql\Connection $conexion */
+
 $pageTitle = "Tequios Comunales";
 $activePage = "tequios";
 

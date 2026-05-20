@@ -49,7 +49,7 @@ class Session {
     /**
      * Verifica si el usuario tiene un rol específico
      */
-    public static function tieneRol($rol) {
+    public static function tieneRol(string $rol) {
         self::iniciar();
         return isset($_SESSION['nombre_rol']) && $_SESSION['nombre_rol'] === $rol;
     }
@@ -66,7 +66,7 @@ class Session {
     /**
      * Crea una sesión de usuario
      */
-    public static function crearSesion($id_usuario, $usuario, $nombre, $id_rol, $nombre_rol) {
+    public static function crearSesion(int $id_usuario, string $usuario, string $nombre, int $id_rol, string $nombre_rol) {
         self::iniciar();
         $_SESSION['id_usuario'] = $id_usuario;
         $_SESSION['usuario'] = $usuario;

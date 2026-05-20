@@ -1,6 +1,8 @@
 <?php
 require_once '../../Shared/Infrastructure/Database/Connection.php';
 
+/** @var \PgSql\Connection|false $conexion */
+
 $pageTitle = "Formulario de Comunero";
 $activePage = "comuneros";
 
@@ -130,9 +132,12 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
                 </div>
             </div>
 
-            <form id="frmComunero" action="/proyectocomunitario/src/Comuneros/Application/acciones.php" method="POST" onsubmit="return validarFormulario();">
+            <div id="notificacion" style="display: none; margin-bottom: 1.5rem; padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid; font-weight: 500;"></div>
+
+            <form id="frmComunero" onsubmit="return enviarFormularioAjax(event);">
                 <input type="hidden" name="accion" value="<?= $modo_edicion ? 'editar' : 'nuevo' ?>">
                 <input type="hidden" name="id_comunero" value="<?= $id_comunero ?>">
+                <input type="hidden" name="ajax" value="1">
 
                 <div class="glass-panel" style="padding: 2rem; margin-bottom: 2rem;">
                     <h3 style="margin-bottom: 1.5rem; color: var(--text-main); font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Información Principal</h3>
@@ -181,7 +186,7 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
 
                     <div class="form-group">
                         <label class="form-label">Teléfono</label>
-                        <input type="tel" name="telefono" class="form-control" value="<?= htmlspecialchars($comunero['telefono'] ?? '') ?>" placeholder="Ej. +52 123 456 7890">
+                        <input type="tel" name="telefono" id="telefono" class="form-control" value="<?= htmlspecialchars($comunero['telefono'] ?? '') ?>" placeholder="Ej. 1234567890" maxlength="10" pattern="^\d{10}$" inputmode="numeric" title="Ingrese solo 10 numeros">
                     </div>
                     
                     <div class="form-group">
@@ -261,17 +266,77 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
     <script>
         let sucesorCount = <?= count($sucesores) ?>;
 
-        // Validar formulario antes de enviar
-        function validarFormulario() {
-            const color = document.getElementById('color_mapa').value;
+        // Mostrar notificación
+        function mostrarNotificacion(tipo, mensaje) {
+            const notif = document.getElementById('notificacion');
+            notif.textContent = mensaje;
+            notif.style.display = 'block';
             
-            // Validar que el color sea un hexadecimal válido
-            if (!color.match(/^#[0-9A-Fa-f]{6}$/)) {
-                alert('❌ Error: El color debe ser un código hexadecimal válido (ej: #FF5733)');
+            if (tipo === 'error') {
+                notif.style.backgroundColor = '#fee2e2';
+                notif.style.color = '#991b1b';
+                notif.style.borderLeftColor = '#dc2626';
+            } else if (tipo === 'success') {
+                notif.style.backgroundColor = '#dcfce7';
+                notif.style.color = '#15803d';
+                notif.style.borderLeftColor = '#16a34a';
+            } else if (tipo === 'warning') {
+                notif.style.backgroundColor = '#fef3c7';
+                notif.style.color = '#92400e';
+                notif.style.borderLeftColor = '#f59e0b';
+            }
+            
+            // Scroll hacia la notificación
+            notif.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Enviar formulario por AJAX
+        async function enviarFormularioAjax(event) {
+            event.preventDefault();
+            
+            const color = document.getElementById('color_mapa').value;
+            const telefonoInput = document.getElementById('telefono');
+            const telefono = telefonoInput.value.trim();
+
+            // Validar telefono: solo numeros y exactamente 10 digitos (si se captura)
+            if (telefono !== '' && !/^\d{10}$/.test(telefono)) {
+                mostrarNotificacion('error', '⚠️ El telefono debe tener exactamente 10 numeros.');
+                telefonoInput.focus();
                 return false;
             }
             
-            return true;
+            // Validar que el color sea un hexadecimal válido
+            if (!color.match(/^#[0-9A-Fa-f]{6}$/)) {
+                mostrarNotificacion('error', '❌ El color debe ser un código hexadecimal válido (ej: #FF5733)');
+                return false;
+            }
+
+            const form = document.getElementById('frmComunero');
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/proyectocomunitario/src/Comuneros/Application/acciones.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarNotificacion('success', data.message);
+                    
+                    // Redirigir después de 2 segundos
+                    setTimeout(() => {
+                        window.location.href = '/proyectocomunitario/public/index.php?page=comuneros&msg=success';
+                    }, 1500);
+                } else {
+                    mostrarNotificacion('error', data.error || 'Error desconocido al procesar la solicitud');
+                }
+            } catch (error) {
+                mostrarNotificacion('error', '❌ Error de conexión: ' + error.message);
+            }
+
+            return false;
         }
 
         // Función para generar un color aleatorio de todo el espectro
