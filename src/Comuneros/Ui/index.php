@@ -1,5 +1,9 @@
 <?php
 require_once '../../Shared/Infrastructure/Database/Connection.php';
+require_once '../../Shared/Infrastructure/Auth/Session.php';
+
+Session::iniciar();
+$esAdmin = Session::esAdmin();
 
 // Ayuda a Intelephense a reconocer la variable definida en el archivo de conexión.
 $conexion = $conexion ?? null;
@@ -283,6 +287,40 @@ if ($resultado_sucesores_raw) {
                 </div>
             </div>
 
+            <?php
+                $mensaje = '';
+                $tipoMensaje = '';
+                if (isset($_GET['msg'])) {
+                    $tipoMensaje = 'ok';
+                    switch ($_GET['msg']) {
+                        case 'success':
+                            $mensaje = 'Comunero guardado correctamente.';
+                            break;
+                        case 'deleted':
+                            $mensaje = 'Comunero desactivado correctamente.';
+                            break;
+                        case 'reactivated':
+                            $mensaje = 'Comunero reactivado correctamente.';
+                            break;
+                        case 'deleted_total':
+                            $mensaje = 'Comunero eliminado definitivamente junto con sus actas y registros relacionados.';
+                            break;
+                        default:
+                            $mensaje = 'Operación realizada correctamente.';
+                    }
+                } elseif (isset($_GET['error'])) {
+                    $tipoMensaje = 'error';
+                    $mensaje = $_GET['error'];
+                }
+            ?>
+
+            <?php if (!empty($mensaje)): ?>
+                <div style="background: <?= $tipoMensaje === 'ok' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' ?>; border: 1px solid <?= $tipoMensaje === 'ok' ? '#10b981' : '#ef4444' ?>; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: <?= $tipoMensaje === 'ok' ? '#059669' : '#991b1b' ?>;">
+                    <i class="fas <?= $tipoMensaje === 'ok' ? 'fa-check-circle' : 'fa-exclamation-circle' ?>"></i>
+                    <?= htmlspecialchars($mensaje) ?>
+                </div>
+            <?php endif; ?>
+
             <!-- Pestañas de Estado -->
             <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border);">
                 <button class="tab-button <?= $tab === 'activos' ? 'active' : '' ?>" 
@@ -407,6 +445,11 @@ if ($resultado_sucesores_raw) {
                                                 <button type="button" onclick="abrirModalReactivar('<?= $row['id_comunero'] ?>', '<?= htmlspecialchars($row['nombre_completo']) ?>');" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(16, 185, 129, 0.1); color: var(--secondary); border-radius: var(--radius-md);" title="Reactivar">
                                                     <i class="fas fa-redo"></i>
                                                 </button>
+                                                <?php if ($esAdmin): ?>
+                                                <button type="button" onclick="abrirModalEliminarTotal('<?= $row['id_comunero'] ?>', '<?= htmlspecialchars($row['nombre_completo']) ?>');" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(185, 28, 28, 0.12); color: #991b1b; border-radius: var(--radius-md);" title="Eliminar totalmente">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
@@ -549,6 +592,36 @@ if ($resultado_sucesores_raw) {
         </div>
     </div>
 
+    <!-- Modal de Confirmación para Eliminación Total -->
+    <div id="modalEliminarTotal" class="modal-delete">
+        <div class="modal-delete-content">
+            <div class="modal-delete-header">
+                <div class="modal-delete-icon" style="background: rgba(153, 27, 27, 0.12); color: #991b1b;">
+                    <i class="fas fa-radiation"></i>
+                </div>
+                <h2 class="modal-delete-title">¿Eliminar registro definitivamente?</h2>
+            </div>
+
+            <p class="modal-delete-description">
+                Esta acción eliminará de forma permanente el comunero y sus registros relacionados. No se puede deshacer.
+            </p>
+
+            <div class="modal-delete-info">
+                <strong>⚠️ Registro a eliminar:</strong>
+                <div id="infoNombreEliminarTotal" style="margin-top: 0.5rem;"></div>
+            </div>
+
+            <div class="modal-delete-footer">
+                <button type="button" class="btn-modal btn-modal-cancel" onclick="cerrarModalEliminarTotal()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn-modal btn-modal-delete" style="background: #991b1b; color: white;" onclick="confirmarEliminarTotal()" onmouseover="this.style.background='#7f1d1d'" onmouseout="this.style.background='#991b1b'">
+                    <i class="fas fa-trash-alt"></i> Eliminar Definitivamente
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Datos de comuneros para el modal de visualización
         const comunerosData = <?php
@@ -652,6 +725,7 @@ if ($resultado_sucesores_raw) {
 
         let idEliminar = null;
         let idReactivar = null;
+        let idEliminarTotal = null;
 
         // ===== Funciones para Desactivar =====
         function abrirModalEliminar(id, nombre) {
@@ -689,12 +763,31 @@ if ($resultado_sucesores_raw) {
             }
         }
 
+        // ===== Funciones para Eliminación Total =====
+        function abrirModalEliminarTotal(id, nombre) {
+            idEliminarTotal = id;
+            document.getElementById('infoNombreEliminarTotal').textContent = nombre;
+            document.getElementById('modalEliminarTotal').classList.add('active');
+        }
+
+        function cerrarModalEliminarTotal() {
+            document.getElementById('modalEliminarTotal').classList.remove('active');
+            idEliminarTotal = null;
+        }
+
+        function confirmarEliminarTotal() {
+            if (idEliminarTotal) {
+                window.location.href = '/proyectocomunitario/src/Comuneros/Application/acciones.php?accion=eliminar_total&id=' + idEliminarTotal;
+            }
+        }
+
         // Cerrar modal al presionar ESC
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 cerrarModalVer();
                 cerrarModalEliminar();
                 cerrarModalReactivar();
+                cerrarModalEliminarTotal();
             }
         });
 
@@ -712,6 +805,12 @@ if ($resultado_sucesores_raw) {
         document.getElementById('modalReactivar').addEventListener('click', function(event) {
             if (event.target === this) {
                 cerrarModalReactivar();
+            }
+        });
+
+        document.getElementById('modalEliminarTotal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModalEliminarTotal();
             }
         });
 

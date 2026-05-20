@@ -12,8 +12,13 @@ $pagina_actual = isset($_GET['p']) ? (int)$_GET['p'] : 1;
 if ($pagina_actual < 1) $pagina_actual = 1;
 $offset = ($pagina_actual - 1) * $por_pagina;
 
-// Total
-$q_total = pg_query($conexion, "SELECT COUNT(*) FROM acta_posesion");
+// Total de actas de comuneros activos
+$q_total = pg_query($conexion, "
+    SELECT COUNT(*)
+    FROM acta_posesion a
+    JOIN comunero c ON a.id_comunero = c.id_comunero
+    WHERE c.activo = TRUE
+");
 $total_registros = pg_fetch_result($q_total, 0, 0);
 $total_paginas = ceil($total_registros / $por_pagina);
 
@@ -23,6 +28,7 @@ $query = "
            (SELECT COUNT(*) FROM archivo ar WHERE ar.id_acta = a.id_acta) as num_archivos
     FROM acta_posesion a
     JOIN comunero c ON a.id_comunero = c.id_comunero
+    WHERE c.activo = TRUE
     ORDER BY a.fecha_acta DESC
     LIMIT $por_pagina OFFSET $offset
 ";
