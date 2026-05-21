@@ -23,8 +23,8 @@ if (isset($_GET['editar'])) {
     }
 }
 
-// Cargar roles
-$sql_roles = "SELECT id_rol, nombre FROM rol ORDER BY nombre";
+// Cargar roles disponibles, excluyendo el rol de consulta
+$sql_roles = "SELECT id_rol, nombre FROM rol WHERE LOWER(nombre) NOT IN ('consulta', 'consultor') ORDER BY nombre";
 $resultado_roles = pg_query($conexion, $sql_roles);
 
 if (!$resultado_roles) {
@@ -91,14 +91,19 @@ while ($row = pg_fetch_assoc($resultado_roles)) {
 
                     <div class="form-group">
                         <label class="form-label">Nombre Completo *</label>
-                        <input type="text" name="nombre" class="form-control" required
+                           <input type="text" name="nombre" class="form-control" required maxlength="100"
+                               pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+"
+                               oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, '')"
+                               title="Solo se permiten letras y espacios."
                                value="<?= $modo === 'editar' ? htmlspecialchars($usuarioEditar['nombre']) : '' ?>"
                                placeholder="Ej. Juan Pérez López">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Usuario *</label>
-                        <input type="text" name="usuario" class="form-control" required
+                           <input type="text" name="usuario" class="form-control" required maxlength="100" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+"
+                               oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '')"
+                               title="Solo se permiten letras."
                                value="<?= $modo === 'editar' ? htmlspecialchars($usuarioEditar['usuario']) : '' ?>"
                                placeholder="Ej. jperez">
                     </div>
@@ -154,6 +159,69 @@ while ($row = pg_fetch_assoc($resultado_roles)) {
     </main>
 
     <script>
+        function esCaracterPermitido(caracter, permitirEspacios) {
+            return permitirEspacios ? /^[\p{L} ]$/u.test(caracter) : /^[\p{L}]$/u.test(caracter);
+        }
+
+        function soloLetras(valor, permitirEspacios) {
+            var patron = permitirEspacios ? /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g : /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g;
+            return valor.replace(patron, '');
+        }
+
+        function aplicarFiltroSoloLetras(selector, permitirEspacios) {
+            var input = document.querySelector(selector);
+            if (!input) {
+                return;
+            }
+
+            input.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey || e.altKey) {
+                    return;
+                }
+
+                var teclasPermitidas = [
+                    'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight',
+                    'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter', 'Escape'
+                ];
+
+                if (teclasPermitidas.indexOf(e.key) !== -1) {
+                    return;
+                }
+
+                if (e.key.length === 1 && !esCaracterPermitido(e.key, permitirEspacios)) {
+                    e.preventDefault();
+                }
+            });
+
+            input.addEventListener('beforeinput', function(e) {
+                if (!e.data) {
+                    return;
+                }
+
+                if (e.inputType && e.inputType.indexOf('insert') === 0 && !esCaracterPermitido(e.data, permitirEspacios) && !/^[\p{L} ]+$/u.test(e.data)) {
+                    e.preventDefault();
+                }
+            });
+
+            input.addEventListener('input', function() {
+                this.value = soloLetras(this.value, permitirEspacios);
+            });
+
+            input.addEventListener('blur', function() {
+                this.value = soloLetras(this.value.trim(), permitirEspacios);
+            });
+
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                var texto = (e.clipboardData || window.clipboardData).getData('text');
+                var limpio = soloLetras(texto, permitirEspacios);
+                document.execCommand('insertText', false, limpio);
+            });
+        }
+
+        aplicarFiltroSoloLetras('[name="nombre"]', true);
+        aplicarFiltroSoloLetras('[name="usuario"]', false);
+
         document.getElementById('frmUsuario').addEventListener('submit', function(e) {
             var nombre = document.querySelector('[name="nombre"]').value.trim();
             if (nombre.length === 0) {
@@ -161,11 +229,25 @@ while ($row = pg_fetch_assoc($resultado_roles)) {
                 alert('El nombre es requerido.');
                 return;
             }
+            document.querySelector('[name="nombre"]').value = nombre.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, '');
+            var nombreValido = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(nombre);
+            if (!nombreValido) {
+                e.preventDefault();
+                alert('El nombre solo debe contener letras y espacios.');
+                return;
+            }
 
             var usuarioField = document.querySelector('[name="usuario"]');
+            usuarioField.value = usuarioField.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '');
             if (usuarioField.value.trim().length === 0) {
                 e.preventDefault();
                 alert('El nombre de usuario es requerido.');
+                usuarioField.focus();
+                return;
+            }
+            if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+$/.test(usuarioField.value.trim())) {
+                e.preventDefault();
+                alert('El nombre de usuario solo debe contener letras.');
                 usuarioField.focus();
                 return;
             }

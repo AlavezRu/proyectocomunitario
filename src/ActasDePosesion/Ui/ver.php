@@ -16,7 +16,7 @@ if (!$id_acta) {
 
 // Obtener datos del acta
 $query = "
-    SELECT a.*, c.nombre_completo, c.numero_progresivo, 
+    SELECT a.*, c.nombre_completo, c.numero_progresivo, c.color_mapa,
            ST_AsGeoJSON(a.ubicacion) as geojson
     FROM acta_posesion a
     JOIN comunero c ON a.id_comunero = c.id_comunero
@@ -314,6 +314,7 @@ while ($doc = pg_fetch_assoc($q_docs)) {
     <script>
         // Inicializar mapa
         const map = L.map('map').setView([17.0627, -96.7236], 10);
+        const colorComunero = <?= json_encode(!empty($acta['color_mapa']) ? $acta['color_mapa'] : '#2563eb') ?>;
         
         // Agregar capa de base
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -327,15 +328,16 @@ while ($doc = pg_fetch_assoc($q_docs)) {
         if (geojson) {
             const geoJsonLayer = L.geoJSON(geojson, {
                 style: {
-                    color: '#2563eb',
+                    color: colorComunero,
                     weight: 2,
                     opacity: 0.8,
+                    fillColor: colorComunero,
                     fillOpacity: 0.3
                 },
                 pointToLayer: function(feature, latlng) {
                     return L.circleMarker(latlng, {
                         radius: 5,
-                        fillColor: '#2563eb',
+                        fillColor: colorComunero,
                         color: '#fff',
                         weight: 2,
                         opacity: 1,

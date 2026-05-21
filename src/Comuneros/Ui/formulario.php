@@ -109,6 +109,74 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
         .color-preview-item { display: inline-block; margin-right: 1rem; margin-bottom: 0.5rem; }
         .color-preview-item span { display: inline-block; width: 14px; height: 14px; border-radius: 2px; vertical-align: middle; border: 1px solid var(--border); margin-right: 0.4rem; }
         .color-status { margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+        .notification-card {
+            display: none;
+            align-items: flex-start;
+            gap: 0.9rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid transparent;
+            box-shadow: var(--shadow-sm);
+            animation: slideDown 0.2s ease-out;
+        }
+        .notification-card.show { display: flex; }
+        .notification-card__icon {
+            width: 2.35rem;
+            height: 2.35rem;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            font-size: 1rem;
+        }
+        .notification-card__title {
+            margin: 0 0 0.2rem 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .notification-card__message {
+            margin: 0;
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+        .notification-card.error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.06));
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #7f1d1d;
+        }
+        .notification-card.error .notification-card__icon {
+            background: rgba(239, 68, 68, 0.16);
+            color: var(--danger);
+        }
+        .notification-card.success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
+            border-color: rgba(16, 185, 129, 0.2);
+            color: #065f46;
+        }
+        .notification-card.success .notification-card__icon {
+            background: rgba(16, 185, 129, 0.16);
+            color: var(--secondary);
+        }
+        .notification-card.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.06));
+            border-color: rgba(245, 158, 11, 0.22);
+            color: #92400e;
+        }
+        .notification-card.warning .notification-card__icon {
+            background: rgba(245, 158, 11, 0.16);
+            color: var(--warning);
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-8px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -132,7 +200,7 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
                 </div>
             </div>
 
-            <div id="notificacion" style="display: none; margin-bottom: 1.5rem; padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid; font-weight: 500;"></div>
+            <div id="notificacion" class="notification-card" aria-live="polite" aria-atomic="true"></div>
 
             <form id="frmComunero" onsubmit="return enviarFormularioAjax(event);">
                 <input type="hidden" name="accion" value="<?= $modo_edicion ? 'editar' : 'nuevo' ?>">
@@ -145,11 +213,12 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
                     <div class="grid-2">
                         <div class="form-group">
                             <label class="form-label">Número Progresivo *</label>
-                            <input type="number" name="numero_progresivo" class="form-control" value="<?= htmlspecialchars($comunero['numero_progresivo']) ?>" required>
+                            <input type="number" name="numero_progresivo_display" class="form-control" value="<?= htmlspecialchars($comunero['numero_progresivo']) ?>" readonly style="background-color: var(--surface-muted); cursor: not-allowed; opacity: 0.7;">
+                            <input type="hidden" name="numero_progresivo" value="<?= htmlspecialchars($comunero['numero_progresivo']) ?>">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nombre Completo *</label>
-                            <input type="text" name="nombre_completo" class="form-control" value="<?= htmlspecialchars($comunero['nombre_completo']) ?>" required>
+                            <input type="text" name="nombre_completo" class="form-control" value="<?= htmlspecialchars($comunero['nombre_completo']) ?>" required maxlength="100" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, '')" title="Solo se permiten letras y espacios.">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Situación Agraria *</label>
@@ -213,13 +282,23 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
                             </button>
                         </div>
 
-                        <!-- Preview del color seleccionado -->
+                        <!-- Preview del color actual y del nuevo color seleccionado -->
                         <div class="color-status" style="margin-top: 1rem;">
-                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                                <div style="width: 60px; height: 60px; background: <?= $comunero['color_mapa'] ?>; border: 2px solid var(--border); border-radius: var(--radius-md); box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
-                                <div>
-                                    <strong style="display: block; color: var(--text-main); margin-bottom: 0.25rem;">Color actual:</strong>
-                                    <code style="background: var(--surface); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;" id="color_display"><?= $comunero['color_mapa'] ?></code>
+                            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div id="color_actual_preview" style="width: 60px; height: 60px; background: <?= $comunero['color_mapa'] ?>; border: 2px solid var(--border); border-radius: var(--radius-md); box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
+                                    <div>
+                                        <strong style="display: block; color: var(--text-main); margin-bottom: 0.25rem;">Color actual:</strong>
+                                        <code style="background: var(--surface); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;"><?= strtoupper($comunero['color_mapa']) ?></code>
+                                    </div>
+                                </div>
+                                <div style="font-size: 1.1rem; color: var(--text-muted);">→</div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div id="color_preview_large" style="width: 60px; height: 60px; background: <?= $comunero['color_mapa'] ?>; border: 2px solid var(--border); border-radius: var(--radius-md); box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
+                                    <div>
+                                        <strong style="display: block; color: var(--text-main); margin-bottom: 0.25rem;">Color nuevo / aleatorio:</strong>
+                                        <code style="background: var(--surface); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;" id="color_display"><?= strtoupper($comunero['color_mapa']) ?></code>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -243,12 +322,43 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
                                     <input type="hidden" name="sucesores[<?= $index ?>][id_sucesor]" value="<?= $s['id_sucesor'] ?>">
                                     <div class="form-group" style="margin: 0;">
                                         <label class="form-label">Nombre del Sucesor</label>
-                                        <input type="text" name="sucesores[<?= $index ?>][nombre]" class="form-control" value="<?= htmlspecialchars($s['nombre_sucesor']) ?>" required>
+                                        <input type="text" name="sucesores[<?= $index ?>][nombre]" class="form-control" value="<?= htmlspecialchars($s['nombre_sucesor']) ?>" required maxlength="100" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, '')" title="Solo se permiten letras y espacios.">
                                     </div>
                                     <div class="form-group" style="margin: 0;">
                                         <label class="form-label">Parentesco</label>
                                         <div style="display: flex; gap: 0.5rem;">
-                                            <input type="text" name="sucesores[<?= $index ?>][parentesco]" class="form-control" value="<?= htmlspecialchars($s['parentesco']) ?>" required>
+                                            <select name="sucesores[<?= $index ?>][parentesco]" class="form-control" required>
+                                                <option value="">Seleccione parentesco</option>
+                                                <option value="Padre" <?= $s['parentesco'] == 'Padre' ? 'selected' : '' ?>>Padre</option>
+                                                <option value="Madre" <?= $s['parentesco'] == 'Madre' ? 'selected' : '' ?>>Madre</option>
+                                                <option value="Abuelo" <?= $s['parentesco'] == 'Abuelo' ? 'selected' : '' ?>>Abuelo</option>
+                                                <option value="Abuela" <?= $s['parentesco'] == 'Abuela' ? 'selected' : '' ?>>Abuela</option>
+                                                <option value="Hijo" <?= $s['parentesco'] == 'Hijo' ? 'selected' : '' ?>>Hijo</option>
+                                                <option value="Hija" <?= $s['parentesco'] == 'Hija' ? 'selected' : '' ?>>Hija</option>
+                                                <option value="Nieto" <?= $s['parentesco'] == 'Nieto' ? 'selected' : '' ?>>Nieto</option>
+                                                <option value="Nieta" <?= $s['parentesco'] == 'Nieta' ? 'selected' : '' ?>>Nieta</option>
+                                                <option value="Hermano" <?= $s['parentesco'] == 'Hermano' ? 'selected' : '' ?>>Hermano</option>
+                                                <option value="Hermana" <?= $s['parentesco'] == 'Hermana' ? 'selected' : '' ?>>Hermana</option>
+                                                <option value="Tío" <?= $s['parentesco'] == 'Tío' ? 'selected' : '' ?>>Tío</option>
+                                                <option value="Tía" <?= $s['parentesco'] == 'Tía' ? 'selected' : '' ?>>Tía</option>
+                                                <option value="Primo" <?= $s['parentesco'] == 'Primo' ? 'selected' : '' ?>>Primo</option>
+                                                <option value="Prima" <?= $s['parentesco'] == 'Prima' ? 'selected' : '' ?>>Prima</option>
+                                                <option value="Sobrino" <?= $s['parentesco'] == 'Sobrino' ? 'selected' : '' ?>>Sobrino</option>
+                                                <option value="Sobrina" <?= $s['parentesco'] == 'Sobrina' ? 'selected' : '' ?>>Sobrina</option>
+                                                <option value="Padrastro" <?= $s['parentesco'] == 'Padrastro' ? 'selected' : '' ?>>Padrastro</option>
+                                                <option value="Madrastra" <?= $s['parentesco'] == 'Madrastra' ? 'selected' : '' ?>>Madrastra</option>
+                                                <option value="Hijastro" <?= $s['parentesco'] == 'Hijastro' ? 'selected' : '' ?>>Hijastro</option>
+                                                <option value="Hijastra" <?= $s['parentesco'] == 'Hijastra' ? 'selected' : '' ?>>Hijastra</option>
+                                                <option value="Cuñado" <?= $s['parentesco'] == 'Cuñado' ? 'selected' : '' ?>>Cuñado</option>
+                                                <option value="Cuñada" <?= $s['parentesco'] == 'Cuñada' ? 'selected' : '' ?>>Cuñada</option>
+                                                <option value="Suegro" <?= $s['parentesco'] == 'Suegro' ? 'selected' : '' ?>>Suegro</option>
+                                                <option value="Suegra" <?= $s['parentesco'] == 'Suegra' ? 'selected' : '' ?>>Suegra</option>
+                                                <option value="Yerno" <?= $s['parentesco'] == 'Yerno' ? 'selected' : '' ?>>Yerno</option>
+                                                <option value="Nuera" <?= $s['parentesco'] == 'Nuera' ? 'selected' : '' ?>>Nuera</option>
+                                                <option value="Esposo" <?= $s['parentesco'] == 'Esposo' ? 'selected' : '' ?>>Esposo</option>
+                                                <option value="Esposa" <?= $s['parentesco'] == 'Esposa' ? 'selected' : '' ?>>Esposa</option>
+                                                <option value="Otro" <?= $s['parentesco'] == 'Otro' ? 'selected' : '' ?>>Otro</option>
+                                            </select>
                                             <button type="button" class="btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0 1rem;" onclick="this.parentElement.parentElement.parentElement.remove()">
                                                 <i class="fas fa-times"></i>
                                             </button>
@@ -266,25 +376,32 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
     <script>
         let sucesorCount = <?= count($sucesores) ?>;
 
+        function escaparHtml(texto) {
+            return String(texto)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // Mostrar notificación
         function mostrarNotificacion(tipo, mensaje) {
             const notif = document.getElementById('notificacion');
-            notif.textContent = mensaje;
-            notif.style.display = 'block';
-            
-            if (tipo === 'error') {
-                notif.style.backgroundColor = '#fee2e2';
-                notif.style.color = '#991b1b';
-                notif.style.borderLeftColor = '#dc2626';
-            } else if (tipo === 'success') {
-                notif.style.backgroundColor = '#dcfce7';
-                notif.style.color = '#15803d';
-                notif.style.borderLeftColor = '#16a34a';
-            } else if (tipo === 'warning') {
-                notif.style.backgroundColor = '#fef3c7';
-                notif.style.color = '#92400e';
-                notif.style.borderLeftColor = '#f59e0b';
-            }
+            const config = {
+                error: { icon: 'fa-circle-exclamation', title: 'No se pudo guardar' },
+                success: { icon: 'fa-circle-check', title: 'Operación exitosa' },
+                warning: { icon: 'fa-triangle-exclamation', title: 'Atención' }
+            }[tipo] || { icon: 'fa-circle-info', title: 'Aviso' };
+
+            notif.className = `notification-card show ${tipo}`;
+            notif.innerHTML = `
+                <div class="notification-card__icon"><i class="fa-solid ${config.icon}"></i></div>
+                <div class="notification-card__content">
+                    <p class="notification-card__title">${escaparHtml(config.title)}</p>
+                    <p class="notification-card__message">${escaparHtml(mensaje)}</p>
+                </div>
+            `;
             
             // Scroll hacia la notificación
             notif.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -297,6 +414,29 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
             const color = document.getElementById('color_mapa').value;
             const telefonoInput = document.getElementById('telefono');
             const telefono = telefonoInput.value.trim();
+            const nombreInput = document.querySelector('[name="nombre_completo"]');
+            const nombre = nombreInput.value.trim();
+
+            if (nombre === '') {
+                mostrarNotificacion('error', '⚠️ El nombre completo es requerido.');
+                nombreInput.focus();
+                return false;
+            }
+            if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(nombre)) {
+                mostrarNotificacion('error', '⚠️ El nombre completo solo debe contener letras y espacios.');
+                nombreInput.focus();
+                return false;
+            }
+
+            const nombresSucesores = Array.from(document.querySelectorAll('input[name$="[nombre]"]'));
+            for (const input of nombresSucesores) {
+                const valor = input.value.trim();
+                if (valor !== '' && !/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(valor)) {
+                    mostrarNotificacion('error', '⚠️ El nombre del sucesor solo debe contener letras y espacios.');
+                    input.focus();
+                    return false;
+                }
+            }
 
             // Validar telefono: solo numeros y exactamente 10 digitos (si se captura)
             if (telefono !== '' && !/^\d{10}$/.test(telefono)) {
@@ -339,18 +479,38 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
             return false;
         }
 
+        const colorPreviewNuevo = document.getElementById('color_preview_large');
+        const colorDisplayNuevo = document.getElementById('color_display');
+        const colorPickerInput = document.getElementById('color_mapa');
+        const colorHexInput = document.getElementById('color_hex');
+
+        function clearColorReferenceSelection() {
+            const colorSelect = document.getElementById('color_select');
+            if (colorSelect) {
+                colorSelect.value = '';
+            }
+        }
+
         // Función para generar un color aleatorio de todo el espectro
         function generarColorAleatorio() {
             // Generar un color hexadecimal completamente aleatorio
             const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
             
             // Sincronizar todos los inputs
-            document.getElementById('color_mapa').value = randomColor;
-            document.getElementById('color_hex').value = randomColor;
-            document.getElementById('color_select').value = ''; // Desseleccionar referencia
-            document.getElementById('color_display').textContent = randomColor;
+            colorPickerInput.value = randomColor;
+            colorHexInput.value = randomColor;
+            clearColorReferenceSelection();
+            updateColorPreview(randomColor);
             
             console.log('Color aleatorio generado:', randomColor);
+        }
+
+        function updateColorPreview(hexValue) {
+            const normalized = hexValue.toUpperCase();
+            colorDisplayNuevo.textContent = normalized;
+            colorPreviewNuevo.style.backgroundColor = normalized;
+            colorPreviewNuevo.style.background = normalized;
+            colorPreviewNuevo.setAttribute('data-color', normalized);
         }
 
         // Función para sincronizar los inputs de color
@@ -364,10 +524,10 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
             hexValue = hexValue.toUpperCase();
             
             // Sincronizar color picker y display
-            document.getElementById('color_mapa').value = hexValue;
-            document.getElementById('color_hex').value = hexValue;
-            document.getElementById('color_display').textContent = hexValue;
-            document.getElementById('color_select').value = ''; // Desseleccionar referencia
+            colorPickerInput.value = hexValue;
+            colorHexInput.value = hexValue;
+            updateColorPreview(hexValue);
+            clearColorReferenceSelection();
             
             return true;
         }
@@ -375,27 +535,45 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
         // Función para aplicar color desde el dropdown de referencia
         function applyColorFromSelect(colorValue) {
             if (colorValue) {
-                document.getElementById('color_mapa').value = colorValue;
-                document.getElementById('color_hex').value = colorValue;
-                document.getElementById('color_display').textContent = colorValue;
+                colorPickerInput.value = colorValue;
+                colorHexInput.value = colorValue;
+                updateColorPreview(colorValue);
+                clearColorReferenceSelection();
             }
         }
 
         // Sincronizar color picker con input hexadecimal
-        document.getElementById('color_mapa').addEventListener('change', function() {
-            document.getElementById('color_hex').value = this.value;
-            document.getElementById('color_display').textContent = this.value.toUpperCase();
-            document.getElementById('color_select').value = '';
+        colorPickerInput.addEventListener('input', function() {
+            colorHexInput.value = this.value;
+            updateColorPreview(this.value);
+            clearColorReferenceSelection();
         });
 
-        document.getElementById('color_hex').addEventListener('input', function() {
+        colorPickerInput.addEventListener('change', function() {
+            colorHexInput.value = this.value;
+            updateColorPreview(this.value);
+            clearColorReferenceSelection();
+        });
+
+        colorHexInput.addEventListener('input', function() {
             // Validar mientras el usuario escribe
             if (this.value.match(/^#[0-9A-Fa-f]{6}$/)) {
-                document.getElementById('color_mapa').value = this.value;
-                document.getElementById('color_display').textContent = this.value.toUpperCase();
-                document.getElementById('color_select').value = '';
+                colorPickerInput.value = this.value;
+                updateColorPreview(this.value);
+                clearColorReferenceSelection();
             }
         });
+
+        updateColorPreview(colorPickerInput.value);
+
+        function handleParentescoSelect(select) {
+            select.addEventListener('change', function() {
+                const opcionDefault = this.querySelector('option[value=""]');
+                if (this.value !== '' && opcionDefault) {
+                    opcionDefault.disabled = true;
+                }
+            });
+        }
 
         function addSucesor() {
             const container = document.getElementById('lista-sucesores');
@@ -407,12 +585,43 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
                     <input type="hidden" name="sucesores[${sucesorCount}][id_sucesor]" value="0">
                     <div class="form-group" style="margin: 0;">
                         <label class="form-label">Nombre del Sucesor</label>
-                        <input type="text" name="sucesores[${sucesorCount}][nombre]" class="form-control" required>
+                        <input type="text" name="sucesores[${sucesorCount}][nombre]" class="form-control" required maxlength="100" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g, '')" title="Solo se permiten letras y espacios.">
                     </div>
                     <div class="form-group" style="margin: 0;">
                         <label class="form-label">Parentesco</label>
                         <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" name="sucesores[${sucesorCount}][parentesco]" class="form-control" required>
+                            <select name="sucesores[${sucesorCount}][parentesco]" class="form-control parentesco-select" required>
+                                <option value="">Seleccione parentesco</option>
+                                <option value="Padre">Padre</option>
+                                <option value="Madre">Madre</option>
+                                <option value="Abuelo">Abuelo</option>
+                                <option value="Abuela">Abuela</option>
+                                <option value="Hijo">Hijo</option>
+                                <option value="Hija">Hija</option>
+                                <option value="Nieto">Nieto</option>
+                                <option value="Nieta">Nieta</option>
+                                <option value="Hermano">Hermano</option>
+                                <option value="Hermana">Hermana</option>
+                                <option value="Tío">Tío</option>
+                                <option value="Tía">Tía</option>
+                                <option value="Primo">Primo</option>
+                                <option value="Prima">Prima</option>
+                                <option value="Sobrino">Sobrino</option>
+                                <option value="Sobrina">Sobrina</option>
+                                <option value="Padrastro">Padrastro</option>
+                                <option value="Madrastra">Madrastra</option>
+                                <option value="Hijastro">Hijastro</option>
+                                <option value="Hijastra">Hijastra</option>
+                                <option value="Cuñado">Cuñado</option>
+                                <option value="Cuñada">Cuñada</option>
+                                <option value="Suegro">Suegro</option>
+                                <option value="Suegra">Suegra</option>
+                                <option value="Yerno">Yerno</option>
+                                <option value="Nuera">Nuera</option>
+                                <option value="Esposo">Esposo</option>
+                                <option value="Esposa">Esposa</option>
+                                <option value="Otro">Otro</option>
+                            </select>
                             <button type="button" class="btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0 1rem;" onclick="this.parentElement.parentElement.parentElement.remove()">
                                 <i class="fas fa-times"></i>
                             </button>
@@ -422,8 +631,15 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
             `;
             
             container.insertAdjacentHTML('beforeend', html);
+            // Aplicar el handler al nuevo select
+            const nuevosSelects = container.querySelectorAll('.parentesco-select');
+            handleParentescoSelect(nuevosSelects[nuevosSelects.length - 1]);
             sucesorCount++;
         }
+        // Al cargar la página, aplicar el handler a los selects existentes
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.parentesco-select').forEach(handleParentescoSelect);
+        });
     </script>
 </body>
 </html>

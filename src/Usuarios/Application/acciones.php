@@ -31,19 +31,29 @@ if ($accion === 'nuevo' || $accion === 'editar') {
     if (strlen($nombre) > 100) {
         redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'El nombre no puede superar 100 caracteres.');
     }
+    if (!preg_match('/^[\p{L}]+(?:[ ][\p{L}]+)*$/u', $nombre)) {
+        redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'El nombre solo debe contener letras y espacios.');
+    }
     if ($usuario_login === '') {
         redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'El nombre de usuario es requerido.');
     }
     if (strlen($usuario_login) > 100) {
         redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'El usuario no puede superar 100 caracteres.');
     }
+    if (!preg_match('/^[\p{L}]+$/u', $usuario_login)) {
+        redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'El nombre de usuario solo debe contener letras.');
+    }
     if ($id_rol <= 0) {
         redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'Debe seleccionar un rol válido.');
     }
 
-    $res_rol = pg_query_params($conexion, 'SELECT id_rol FROM rol WHERE id_rol = $1', [$id_rol]);
+    $res_rol = pg_query_params($conexion, 'SELECT id_rol, nombre FROM rol WHERE id_rol = $1', [$id_rol]);
     if (!$res_rol || pg_num_rows($res_rol) === 0) {
         redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'El rol seleccionado no existe.');
+    }
+    $rolSeleccionado = pg_fetch_assoc($res_rol);
+    if (in_array(mb_strtolower($rolSeleccionado['nombre']), ['consulta', 'consultor'], true)) {
+        redirigir($accion === 'nuevo' ? 'usuarios_formulario' : 'usuarios_formulario&editar=' . $id_usuario, 'error', 'Ese rol no está disponible para asignación.');
     }
 
     pg_query($conexion, 'BEGIN');

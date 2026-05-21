@@ -22,6 +22,56 @@ $anios = range(date('Y') - 10, date('Y'));
     <style>
         .stat-card { cursor: pointer; }
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .notification-card {
+            display: none;
+            align-items: flex-start;
+            gap: 0.9rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid transparent;
+            box-shadow: var(--shadow-sm);
+            animation: slideDown 0.2s ease-out;
+        }
+        .notification-card.show { display: flex; }
+        .notification-card__icon {
+            width: 2.35rem;
+            height: 2.35rem;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            font-size: 1rem;
+        }
+        .notification-card__title {
+            margin: 0 0 0.2rem 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .notification-card__message {
+            margin: 0;
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+        .notification-card.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.06));
+            border-color: rgba(245, 158, 11, 0.22);
+            color: #92400e;
+        }
+        .notification-card.warning .notification-card__icon {
+            background: rgba(245, 158, 11, 0.16);
+            color: var(--warning);
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-8px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -32,6 +82,8 @@ $anios = range(date('Y') - 10, date('Y'));
         <?php include '../../Shared/Ui/Layout/header.php'; ?>
 
         <div class="content-container animate-fade-in">
+            <div id="notificacionReporte" class="notification-card" aria-live="polite" aria-atomic="true"></div>
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                 <div>
                     <h1 style="font-size: 1.75rem; color: var(--text-main); margin-bottom: 0.5rem;">Generación de Reportes</h1>
@@ -237,11 +289,44 @@ $anios = range(date('Y') - 10, date('Y'));
     </main>
 
     <script>
+    function escaparHtml(texto) {
+        return String(texto)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function mostrarNotificacion(tipo, mensaje) {
+        const notificacion = document.getElementById('notificacionReporte');
+        const config = {
+            warning: { icon: 'fa-triangle-exclamation', title: 'Selecciona un reporte' }
+        }[tipo] || { icon: 'fa-circle-info', title: 'Aviso' };
+
+        notificacion.className = `notification-card show ${tipo}`;
+        notificacion.innerHTML = `
+            <div class="notification-card__icon"><i class="fa-solid ${config.icon}"></i></div>
+            <div class="notification-card__content">
+                <p class="notification-card__title">${escaparHtml(config.title)}</p>
+                <p class="notification-card__message">${escaparHtml(mensaje)}</p>
+            </div>
+        `;
+
+        notificacion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function ocultarNotificacion() {
+        document.getElementById('notificacionReporte').className = 'notification-card';
+    }
+
     function actualizarFiltros() {
         const tipo = document.getElementById('tipoFiltro').value;
         const divLocalidad = document.getElementById('divLocalidad');
         const divSituacion = document.getElementById('divSituacion');
         const divAnio = document.getElementById('divAnio');
+
+        ocultarNotificacion();
         
         // Ocultar todos los divs
         divLocalidad.style.display = 'none';
@@ -265,9 +350,11 @@ $anios = range(date('Y') - 10, date('Y'));
         
         const tipo = document.getElementById('tipoFiltro').value;
         if (!tipo) {
-            alert('Por favor selecciona un tipo de reporte');
+            mostrarNotificacion('warning', 'Por favor selecciona un tipo de reporte antes de generarlo.');
             return;
         }
+
+        ocultarNotificacion();
 
         const params = new URLSearchParams();
         params.append('tipo', tipo);

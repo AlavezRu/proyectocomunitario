@@ -49,6 +49,79 @@ $total_adeudo = $total_comuneros - $total_pagados;
     <style>
         .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--secondary); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
         .badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+        .predial-confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .predial-confirm-overlay.active {
+            display: flex;
+        }
+        .predial-confirm-modal {
+            width: min(92vw, 460px);
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+        }
+        .predial-confirm-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+        }
+        .predial-confirm-title {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            font-size: 1rem;
+            color: #b91c1c;
+            font-weight: 700;
+        }
+        .predial-confirm-close {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 1.35rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .predial-confirm-body {
+            padding: 1rem 1.25rem;
+        }
+        .predial-confirm-body p {
+            margin: 0;
+            color: var(--text-main);
+            line-height: 1.5;
+            font-size: 0.92rem;
+        }
+        .predial-confirm-meta {
+            margin-top: 0.75rem;
+            padding: 0.65rem 0.75rem;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .predial-confirm-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6rem;
+            background: #f8fafc;
+        }
     </style>
 </head>
 <body>
@@ -163,7 +236,15 @@ $total_adeudo = $total_comuneros - $total_pagados;
                                         <td style="padding: 1rem 0.5rem; text-align: center;">
                                             <?php if($row['pagado'] == 't'): ?>
                                                 <!-- Deshacer pago -->
-                                                <button type="button" onclick="if(confirm('¿Deshacer pago?')) window.location.href='/proyectocomunitario/src/Predial/Application/deshacer_pago.php?id_pago=<?= $row['id_pago'] ?>&anio=<?= $anio_filtro ?>';" class="btn" style="padding: 0.4rem 0.6rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);" title="Eliminar Pago">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-undo-pago"
+                                                    data-url="/proyectocomunitario/src/Predial/Application/deshacer_pago.php?id_pago=<?= $row['id_pago'] ?>&anio=<?= $anio_filtro ?>"
+                                                    data-comunero="<?= htmlspecialchars($row['nombre_completo']) ?>"
+                                                    data-folio="<?= str_pad($row['numero_progresivo'], 4, '0', STR_PAD_LEFT) ?>"
+                                                    style="padding: 0.4rem 0.6rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-radius: var(--radius-md);"
+                                                    title="Eliminar Pago"
+                                                >
                                                     <i class="fas fa-undo"></i>
                                                 </button>
                                             <?php else: ?>
@@ -183,7 +264,78 @@ $total_adeudo = $total_comuneros - $total_pagados;
         </div>
     </main>
 
+    <div id="undoPagoModal" class="predial-confirm-overlay" aria-hidden="true">
+        <div class="predial-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="undoPagoTitle">
+            <div class="predial-confirm-header">
+                <h3 id="undoPagoTitle" class="predial-confirm-title">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    Confirmar deshacer pago
+                </h3>
+                <button type="button" id="undoPagoCerrar" class="predial-confirm-close" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="predial-confirm-body">
+                <p>Se eliminará el registro de pago predial de este comunero para el año seleccionado.</p>
+                <div id="undoPagoMeta" class="predial-confirm-meta"></div>
+            </div>
+            <div class="predial-confirm-footer">
+                <button type="button" id="undoPagoCancelar" class="btn" style="background: #fff; border: 1px solid var(--border);">Cancelar</button>
+                <button type="button" id="undoPagoConfirmar" class="btn" style="background: var(--danger); color: #fff; border: 1px solid var(--danger);">
+                    <i class="fas fa-undo"></i> Deshacer pago
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let undoPagoUrl = '';
+
+        function abrirModalDeshacerPago(url, comunero, folio) {
+            const modal = document.getElementById('undoPagoModal');
+            const meta = document.getElementById('undoPagoMeta');
+
+            undoPagoUrl = url;
+            meta.textContent = `Folio ${folio} - ${comunero}`;
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function cerrarModalDeshacerPago() {
+            const modal = document.getElementById('undoPagoModal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            undoPagoUrl = '';
+        }
+
+        document.querySelectorAll('.btn-undo-pago').forEach((btn) => {
+            btn.addEventListener('click', function() {
+                abrirModalDeshacerPago(this.dataset.url, this.dataset.comunero, this.dataset.folio);
+            });
+        });
+
+        document.getElementById('undoPagoConfirmar').addEventListener('click', function() {
+            if (undoPagoUrl) {
+                window.location.href = undoPagoUrl;
+            }
+        });
+
+        document.getElementById('undoPagoCancelar').addEventListener('click', cerrarModalDeshacerPago);
+        document.getElementById('undoPagoCerrar').addEventListener('click', cerrarModalDeshacerPago);
+
+        document.getElementById('undoPagoModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModalDeshacerPago();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('undoPagoModal');
+                if (modal.classList.contains('active')) {
+                    cerrarModalDeshacerPago();
+                }
+            }
+        });
+
         document.getElementById('busquedaInput').addEventListener('keyup', function() {
             const termino = this.value.toLowerCase();
             const filas = document.querySelectorAll('.fila-predial');
