@@ -13,6 +13,20 @@ Session::iniciar();
 $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 $isAjax = !empty($_POST['ajax']);
 
+function validarNombreSoloLetras(string $valor): bool {
+    return (bool)preg_match('/^[\p{L}]+(?:[ ]+[\p{L}]+)*$/u', trim($valor));
+}
+
+function obtenerMensajeErrorComunero(string $errorSql, string $accion): string {
+    $esInsercion = $accion === 'nuevo';
+
+    if (stripos($errorSql, 'comunero_numero_progresivo_key') !== false || stripos($errorSql, 'llave duplicada') !== false) {
+        return 'El número progresivo ya está registrado. Use otro número.';
+    }
+
+    return $esInsercion ? 'No fue posible registrar el comunero. Intente nuevamente.' : 'No fue posible actualizar el comunero. Intente nuevamente.';
+}
+
 if ($accion == 'nuevo' || $accion == 'editar') {
     // Recibir datos principales
     $id_comunero = isset($_POST['id_comunero']) ? (int)$_POST['id_comunero'] : 0;
@@ -31,6 +45,13 @@ if ($accion == 'nuevo' || $accion == 'editar') {
     pg_query($conexion, "BEGIN");
 
     try {
+        if ($nombre_completo === '') {
+            throw new Exception("⚠️ El nombre completo es requerido.");
+        }
+        if (!validarNombreSoloLetras($nombre_completo)) {
+            throw new Exception("⚠️ El nombre completo solo debe contener letras y espacios.");
+        }
+
         // Validar telefono: solo numeros y exactamente 10 digitos (si se captura)
         if (!empty($telefono) && !preg_match('/^\d{10}$/', $telefono)) {
             throw new Exception("⚠️ El telefono debe tener exactamente 10 numeros.");
@@ -81,13 +102,29 @@ if ($accion == 'nuevo' || $accion == 'editar') {
             throw new Exception("🎨 El color ya está siendo usado por: " . htmlspecialchars($row_color['nombre_completo']));
         }
 
+        // Validar que el número progresivo no se repita
+        $query_progresivo = "SELECT id_comunero, nombre_completo FROM comunero WHERE numero_progresivo = $1";
+        if ($accion == 'editar') {
+            $query_progresivo .= " AND id_comunero != $2";
+            $res_progresivo = pg_query_params($conexion, $query_progresivo, [$numero_progresivo, $id_comunero]);
+        } else {
+            $res_progresivo = pg_query_params($conexion, $query_progresivo, [$numero_progresivo]);
+        }
+
+        if (pg_num_rows($res_progresivo) > 0) {
+            $row_progresivo = pg_fetch_assoc($res_progresivo);
+            throw new Exception("⚠️ El número progresivo '{$numero_progresivo}' ya está registrado por: " . htmlspecialchars($row_progresivo['nombre_completo']));
+        }
+
         if ($accion == 'nuevo') {
             // Insertar comunero
             $sql = "INSERT INTO comunero (numero_progresivo, nombre_completo, id_situacion, id_localidad, numero_ran, numero_certificado, lugar_residencia, telefono, observaciones, color_mapa) 
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id_comunero";
             $res = pg_query_params($conexion, $sql, [$numero_progresivo, $nombre_completo, $id_situacion, $id_localidad, $numero_ran, $numero_certificado, $lugar_residencia, $telefono, $observaciones, $color_mapa]);
             
-            if (!$res) throw new Exception("❌ Error al insertar comunero: " . pg_last_error($conexion));
+            if (!$res) {
+                throw new Exception(obtenerMensajeErrorComunero(pg_last_error($conexion), $accion));
+            }
             $id_comunero = pg_fetch_result($res, 0, 0);
 
         } else {
@@ -98,7 +135,9 @@ if ($accion == 'nuevo' || $accion == 'editar') {
                     WHERE id_comunero = $11";
             $res = pg_query_params($conexion, $sql, [$numero_progresivo, $nombre_completo, $id_situacion, $id_localidad, $numero_ran, $numero_certificado, $lugar_residencia, $telefono, $observaciones, $color_mapa, $id_comunero]);
             
-            if (!$res) throw new Exception("❌ Error al actualizar comunero: " . pg_last_error($conexion));
+            if (!$res) {
+                throw new Exception(obtenerMensajeErrorComunero(pg_last_error($conexion), $accion));
+            }
             
             // Borrar sucesores actuales para insertar los que vienen en el form
             pg_query_params($conexion, "DELETE FROM sucesor WHERE id_comunero = $1", [$id_comunero]);
@@ -109,6 +148,9 @@ if ($accion == 'nuevo' || $accion == 'editar') {
             $nombre = trim($s['nombre'] ?? '');
             $parentesco = trim($s['parentesco'] ?? '');
             if (!empty($nombre)) {
+                if (!validarNombreSoloLetras($nombre)) {
+                    throw new Exception("⚠️ El nombre del sucesor solo debe contener letras y espacios.");
+                }
                 $sql_suc = "INSERT INTO sucesor (id_comunero, nombre_sucesor, parentesco) VALUES ($1, $2, $3)";
                 pg_query_params($conexion, $sql_suc, [$id_comunero, $nombre, $parentesco]);
             }

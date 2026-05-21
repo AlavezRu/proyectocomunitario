@@ -21,6 +21,15 @@ $usuarios = [];
 while ($row = pg_fetch_assoc($resultado)) {
     $usuarios[] = $row;
 }
+
+function nombreRolVisible(?string $nombreRol): string {
+    $rol = strtolower(trim((string)$nombreRol));
+    if (in_array($rol, ['consulta', 'consultor'], true)) {
+        return 'Sin rol';
+    }
+
+    return $nombreRol !== null && $nombreRol !== '' ? $nombreRol : 'Sin rol';
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -96,7 +105,7 @@ while ($row = pg_fetch_assoc($resultado)) {
                                         <td style="padding: 1rem 0.5rem; font-family: monospace; font-size: 0.85rem;"><?= htmlspecialchars($usuario['password_hash'] ?? '') ?></td>
                                         <td style="padding: 1rem 0.5rem;">
                                             <span style="background: rgba(37, 99, 235, 0.1); color: var(--primary); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">
-                                                <?= htmlspecialchars($usuario['nombre_rol'] ?? 'Sin rol') ?>
+                                                <?= htmlspecialchars(nombreRolVisible($usuario['nombre_rol'] ?? null)) ?>
                                             </span>
                                         </td>
                                         <td style="padding: 1rem 0.5rem;">

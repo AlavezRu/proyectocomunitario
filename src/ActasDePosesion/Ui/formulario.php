@@ -198,6 +198,108 @@ if ($q_localidades) {
             font-size: 0.85rem; 
             color: var(--text-muted); 
         }
+        .confirm-delete-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: min(92vw, 460px);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .confirm-delete-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);
+        }
+        .confirm-delete-title {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #9a3412;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .confirm-delete-body {
+            padding: 1.1rem 1.25rem;
+        }
+        .confirm-delete-message {
+            margin: 0;
+            color: var(--text-main);
+            line-height: 1.5;
+            font-size: 0.92rem;
+        }
+        .confirm-delete-file {
+            margin-top: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.88rem;
+            word-break: break-word;
+        }
+        .confirm-delete-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6rem;
+            background: #f8fafc;
+        }
+        .ui-toast {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            width: min(92vw, 380px);
+            z-index: 11000;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            padding: 0.9rem 1rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+            background: white;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+        .ui-toast.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .ui-toast.success {
+            border-left: 4px solid #16a34a;
+        }
+        .ui-toast.error {
+            border-left: 4px solid #dc2626;
+        }
+        .ui-toast-icon {
+            margin-top: 0.1rem;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .ui-toast.success .ui-toast-icon {
+            color: #16a34a;
+        }
+        .ui-toast.error .ui-toast-icon {
+            color: #dc2626;
+        }
+        .ui-toast-text {
+            color: var(--text-main);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin: 0;
+            flex: 1;
+        }
         @media (max-width: 768px) { 
             .grid-2 { grid-template-columns: 1fr; } 
             .modal-content { width: 95vw; }
@@ -400,6 +502,35 @@ if ($q_localidades) {
         </div>
     </div>
 
+    <!-- Modal de confirmación para eliminar documento -->
+    <div id="confirmDeleteModal" class="modal-overlay" aria-hidden="true">
+        <div class="confirm-delete-content" role="dialog" aria-modal="true" aria-labelledby="confirmDeleteTitle">
+            <div class="confirm-delete-header">
+                <h3 id="confirmDeleteTitle" class="confirm-delete-title">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    Confirmar eliminación
+                </h3>
+                <button type="button" class="btn-close" id="btnCloseConfirmDelete" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="confirm-delete-body">
+                <p class="confirm-delete-message">Esta acción es permanente y no se puede deshacer.</p>
+                <div id="confirmDeleteFileName" class="confirm-delete-file"></div>
+            </div>
+            <div class="confirm-delete-footer">
+                <button type="button" id="btnCancelDelete" class="btn" style="background: white; border: 1px solid var(--border);">Cancelar</button>
+                <button type="button" id="btnConfirmDelete" class="btn" style="background: var(--danger); color: white; border: 1px solid var(--danger);">
+                    <i class="fas fa-trash-alt"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de notificaciones -->
+    <div id="uiToast" class="ui-toast" role="status" aria-live="polite">
+        <i id="uiToastIcon" class="ui-toast-icon fas fa-circle-info"></i>
+        <p id="uiToastText" class="ui-toast-text"></p>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- Leaflet JS -->
@@ -409,6 +540,90 @@ if ($q_localidades) {
         let poligonoPoints = [];
         let poligonoLayer = null;
         let dibujando = false;
+        let toastTimer = null;
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('uiToast');
+            const icon = document.getElementById('uiToastIcon');
+            const text = document.getElementById('uiToastText');
+
+            if (!toast || !icon || !text) return;
+
+            toast.classList.remove('success', 'error', 'active');
+            toast.classList.add(type === 'error' ? 'error' : 'success');
+
+            icon.className = `ui-toast-icon fas ${type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check'}`;
+            text.textContent = message;
+
+            if (toastTimer) {
+                clearTimeout(toastTimer);
+            }
+
+            requestAnimationFrame(() => {
+                toast.classList.add('active');
+            });
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 2800);
+        }
+
+        function confirmDeleteDocument(nombreArchivo) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('confirmDeleteModal');
+                const fileName = document.getElementById('confirmDeleteFileName');
+                const btnConfirm = document.getElementById('btnConfirmDelete');
+                const btnCancel = document.getElementById('btnCancelDelete');
+                const btnClose = document.getElementById('btnCloseConfirmDelete');
+
+                if (!modal || !fileName || !btnConfirm || !btnCancel || !btnClose) {
+                    resolve(confirm(`¿Deseas eliminar el archivo "${nombreArchivo}"?`));
+                    return;
+                }
+
+                fileName.textContent = nombreArchivo;
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+
+                const cleanup = () => {
+                    modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                    btnConfirm.removeEventListener('click', onConfirm);
+                    btnCancel.removeEventListener('click', onCancel);
+                    btnClose.removeEventListener('click', onCancel);
+                    modal.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onEsc);
+                };
+
+                const onConfirm = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const onBackdrop = (event) => {
+                    if (event.target === modal) {
+                        onCancel();
+                    }
+                };
+
+                const onEsc = (event) => {
+                    if (event.key === 'Escape') {
+                        onCancel();
+                    }
+                };
+
+                btnConfirm.addEventListener('click', onConfirm);
+                btnCancel.addEventListener('click', onCancel);
+                btnClose.addEventListener('click', onCancel);
+                modal.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onEsc);
+            });
+        }
 
         // Función para desplegar/retraer instrucciones
         function toggleInstructions() {
@@ -1133,12 +1348,13 @@ if ($q_localidades) {
 
         // Manejar eliminación de documentos
         document.querySelectorAll('.btn-delete-doc').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', async function(e) {
                 e.preventDefault();
                 const id_archivo = this.dataset.id;
                 const nombre = this.dataset.name;
+                const confirmado = await confirmDeleteDocument(nombre);
 
-                if (confirm(`¿Estás seguro de que deseas eliminar el archivo "${nombre}"?`)) {
+                if (confirmado) {
                     const formData = new FormData();
                     formData.append('accion', 'eliminar_archivo');
                     formData.append('id_archivo', id_archivo);
@@ -1151,16 +1367,18 @@ if ($q_localidades) {
                     .then(response => response.text())
                     .then(data => {
                         if (data.includes('success') || data.includes('eliminado')) {
-                            // Recargar la página o la sección de documentos
-                            location.reload();
+                            showToast(`El archivo "${nombre}" se eliminó correctamente.`, 'success');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 700);
                         } else {
-                            alert('Error al eliminar el archivo.');
+                            showToast(`No se pudo eliminar el archivo "${nombre}". Intenta nuevamente.`, 'error');
                             console.error('Response:', data);
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Error al eliminar el archivo.');
+                        showToast(`Ocurrió un problema al eliminar "${nombre}". Verifica tu conexión e inténtalo de nuevo.`, 'error');
                     });
                 }
             });

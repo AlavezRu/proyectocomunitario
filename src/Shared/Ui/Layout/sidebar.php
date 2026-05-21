@@ -3,6 +3,15 @@
 require_once __DIR__ . '/../../Infrastructure/Auth/Session.php';
 Session::iniciar();
 $usuario = Session::obtenerUsuario();
+
+function nombreRolVisibleSidebar(?string $nombreRol): string {
+    $rol = strtolower(trim((string)$nombreRol));
+    if (in_array($rol, ['consulta', 'consultor'], true)) {
+        return 'Usuario';
+    }
+
+    return $nombreRol !== null && $nombreRol !== '' ? $nombreRol : 'Usuario';
+}
 ?>
 
 <aside class="sidebar">
@@ -27,7 +36,7 @@ $usuario = Session::obtenerUsuario();
                 </div>
                 <div style="font-size: 0.71rem; color: var(--text-muted);">
                     <span style="background: rgba(37, 99, 235, 0.1); color: var(--primary); padding: 0.15rem 0.3rem; border-radius: 2px;">
-                        <?= htmlspecialchars($usuario['nombre_rol'] ?? 'Usuario') ?>
+                        <?= htmlspecialchars(nombreRolVisibleSidebar($usuario['nombre_rol'] ?? null)) ?>
                     </span>
                 </div>
             </div>
