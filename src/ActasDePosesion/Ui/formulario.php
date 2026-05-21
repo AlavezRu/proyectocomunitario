@@ -252,6 +252,61 @@ if ($q_localidades) {
             gap: 0.6rem;
             background: #f8fafc;
         }
+        .warning-modal-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: min(92vw, 520px);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .warning-modal-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+        }
+        .warning-modal-title {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #92400e;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .warning-modal-body {
+            padding: 1.1rem 1.25rem;
+        }
+        .warning-modal-message {
+            margin: 0;
+            color: var(--text-main);
+            line-height: 1.55;
+            font-size: 0.92rem;
+        }
+        .warning-modal-note {
+            margin-top: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: var(--radius-md);
+            color: #9a3412;
+            font-size: 0.86rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        .warning-modal-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6rem;
+            background: #f8fafc;
+        }
         .ui-toast {
             position: fixed;
             right: 1rem;
@@ -525,6 +580,34 @@ if ($q_localidades) {
         </div>
     </div>
 
+    <!-- Modal de advertencia: polígono requerido -->
+    <div id="polygonRequiredModal" class="modal-overlay" aria-hidden="true">
+        <div class="warning-modal-content" role="dialog" aria-modal="true" aria-labelledby="polygonRequiredTitle">
+            <div class="warning-modal-header">
+                <h3 id="polygonRequiredTitle" class="warning-modal-title">
+                    <i class="fas fa-draw-polygon"></i>
+                    Falta delimitar el predio
+                </h3>
+                <button type="button" class="btn-close" id="btnClosePolygonRequired" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="warning-modal-body">
+                <p class="warning-modal-message">
+                    Para guardar el acta necesitas seleccionar y guardar un polígono en el mapa.
+                </p>
+                <div class="warning-modal-note">
+                    <i class="fas fa-circle-info" style="margin-top: 0.1rem;"></i>
+                    <span>Abre el mapa, dibuja el terreno y presiona "Guardar Polígono".</span>
+                </div>
+            </div>
+            <div class="warning-modal-footer">
+                <button type="button" id="btnPolygonRequiredCancel" class="btn" style="background: white; border: 1px solid var(--border);">Cerrar</button>
+                <button type="button" id="btnPolygonRequiredOpenMap" class="btn btn-primary">
+                    <i class="fas fa-map"></i> Abrir mapa
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast de notificaciones -->
     <div id="uiToast" class="ui-toast" role="status" aria-live="polite">
         <i id="uiToastIcon" class="ui-toast-icon fas fa-circle-info"></i>
@@ -620,6 +703,61 @@ if ($q_localidades) {
                 btnConfirm.addEventListener('click', onConfirm);
                 btnCancel.addEventListener('click', onCancel);
                 btnClose.addEventListener('click', onCancel);
+                modal.addEventListener('click', onBackdrop);
+                document.addEventListener('keydown', onEsc);
+            });
+        }
+
+        function showPolygonRequiredModal() {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('polygonRequiredModal');
+                const btnOpenMap = document.getElementById('btnPolygonRequiredOpenMap');
+                const btnCancel = document.getElementById('btnPolygonRequiredCancel');
+                const btnClose = document.getElementById('btnClosePolygonRequired');
+
+                if (!modal || !btnOpenMap || !btnCancel || !btnClose) {
+                    resolve('close');
+                    return;
+                }
+
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+
+                const cleanup = () => {
+                    modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                    btnOpenMap.removeEventListener('click', onOpenMap);
+                    btnCancel.removeEventListener('click', onClose);
+                    btnClose.removeEventListener('click', onClose);
+                    modal.removeEventListener('click', onBackdrop);
+                    document.removeEventListener('keydown', onEsc);
+                };
+
+                const onOpenMap = () => {
+                    cleanup();
+                    resolve('open-map');
+                };
+
+                const onClose = () => {
+                    cleanup();
+                    resolve('close');
+                };
+
+                const onBackdrop = (event) => {
+                    if (event.target === modal) {
+                        onClose();
+                    }
+                };
+
+                const onEsc = (event) => {
+                    if (event.key === 'Escape') {
+                        onClose();
+                    }
+                };
+
+                btnOpenMap.addEventListener('click', onOpenMap);
+                btnCancel.addEventListener('click', onClose);
+                btnClose.addEventListener('click', onClose);
                 modal.addEventListener('click', onBackdrop);
                 document.addEventListener('keydown', onEsc);
             });
@@ -1318,7 +1456,7 @@ if ($q_localidades) {
         });
 
         // Validar formulario antes de enviar
-        document.getElementById('frmActa').addEventListener('submit', function(e) {
+        document.getElementById('frmActa').addEventListener('submit', async function(e) {
             console.log('=== Validando formulario ===');
             
             const ubicacion = document.getElementById('ubicacion_geojson').value;
@@ -1327,7 +1465,10 @@ if ($q_localidades) {
             // Validar georreferenciación
             if (!ubicacion || ubicacion.trim() === '') {
                 e.preventDefault();
-                alert('Por favor, dibuja el polígono del terreno en el mapa');
+                const decision = await showPolygonRequiredModal();
+                if (decision === 'open-map') {
+                    document.getElementById('btnAbrirMapa').click();
+                }
                 return false;
             }
             
