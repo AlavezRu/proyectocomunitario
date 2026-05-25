@@ -98,7 +98,7 @@ $anios = range(date('Y') - 10, date('Y'));
                 </h2>
 
                 <form id="frmReporteFiltro" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                    
+
                     <!-- Tipo de Reporte -->
                     <div>
                         <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main);">
@@ -133,9 +133,9 @@ $anios = range(date('Y') - 10, date('Y'));
                         </label>
                         <select name="situacion" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 0.95rem; cursor: pointer;">
                             <option value="">-- Todas las situaciones --</option>
-                            <?php 
+                            <?php
                             pg_result_seek($situaciones, 0);
-                            while($row = pg_fetch_assoc($situaciones)): 
+                            while($row = pg_fetch_assoc($situaciones)):
                             ?>
                                 <option value="<?= $row['id_situacion'] ?>"><?= htmlspecialchars($row['descripcion']) ?></option>
                             <?php endwhile; ?>
@@ -182,17 +182,15 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 2. Adeudo Predial -->
-                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=adeudo_predial" target="_blank" style="text-decoration: none; color: inherit;">
-                    <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='var(--danger)'" onmouseout="this.style.borderColor='var(--border)'">
-                        <div class="stat-icon danger">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 style="color: var(--text-main); font-size: 1rem; font-weight: 600;">Adeudo Predial</h3>
-                            <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: none; margin-top: 0.25rem;">Comuneros con pagos pendientes</p>
-                        </div>
+                <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast); cursor: pointer;" onmouseover="this.style.borderColor='var(--danger)'" onmouseout="this.style.borderColor='var(--border)'" onclick="abrirModalAnio('adeudo_predial', 'Adeudo Predial')">
+                    <div class="stat-icon danger">
+                        <i class="fas fa-file-invoice-dollar"></i>
                     </div>
-                </a>
+                    <div class="stat-info">
+                        <h3 style="color: var(--text-main); font-size: 1rem; font-weight: 600;">Adeudo Predial</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: none; margin-top: 0.25rem;">Comuneros con pagos pendientes</p>
+                    </div>
+                </div>
 
                 <!-- 3. Sin Sucesores -->
                 <a href="/proyectocomunitario/public/reportes_generar.php?tipo=sin_sucesores" target="_blank" style="text-decoration: none; color: inherit;">
@@ -260,17 +258,15 @@ $anios = range(date('Y') - 10, date('Y'));
                 </a>
 
                 <!-- 8. Pagos Prediales -->
-                <a href="/proyectocomunitario/public/reportes_generar.php?tipo=pagos" target="_blank" style="text-decoration: none; color: inherit;">
-                    <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='var(--border)'">
-                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 style="color: var(--text-main); font-size: 1rem; font-weight: 600;">Pagos Prediales</h3>
-                            <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: none; margin-top: 0.25rem;">Recaudación de pago predial</p>
-                        </div>
+                <div class="glass-panel stat-card" style="border: 1px solid var(--border); transition: var(--transition-fast); cursor: pointer;" onmouseover="this.style.borderColor='#f59e0b'" onmouseout="this.style.borderColor='var(--border)'" onclick="abrirModalAnio('pagos', 'Pagos Prediales')">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                        <i class="fas fa-money-bill-wave"></i>
                     </div>
-                </a>
+                    <div class="stat-info">
+                        <h3 style="color: var(--text-main); font-size: 1rem; font-weight: 600;">Pagos Prediales</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: none; margin-top: 0.25rem;">Recaudación de pago predial</p>
+                    </div>
+                </div>
 
                 <!-- 9. Situación de Comuneros -->
                 <a href="/proyectocomunitario/public/reportes_generar.php?tipo=situacion_comuneros" target="_blank" style="text-decoration: none; color: inherit;">
@@ -287,6 +283,34 @@ $anios = range(date('Y') - 10, date('Y'));
             </div>
         </div>
     </main>
+
+    <!-- Modal Selector de Año -->
+    <div id="modalAnio" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; animation: fadeIn 0.2s ease-in-out;">
+        <div style="background:white; border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:2rem; max-width:360px; width:90%; animation: slideUp 0.3s ease-out;">
+            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem;">
+                <div style="width:42px; height:42px; background:rgba(245,158,11,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--warning); font-size:1.2rem; flex-shrink:0;">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <h3 style="margin:0; font-size:1.1rem; font-weight:700; color:var(--text-main);" id="modalAnioTitulo"></h3>
+                    <p style="margin:0; font-size:0.82rem; color:var(--text-muted);">Selecciona el año del reporte</p>
+                </div>
+            </div>
+            <select id="selectAnioModal" style="width:100%; padding:0.75rem; border:1px solid var(--border); border-radius:8px; font-size:1rem; margin-bottom:1.5rem; cursor:pointer;">
+                <?php foreach (array_reverse($anios) as $anio): ?>
+                    <option value="<?= $anio ?>" <?= $anio == date('Y') ? 'selected' : '' ?>><?= $anio ?></option>
+                <?php endforeach; ?>
+            </select>
+            <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+                <button onclick="cerrarModalAnio()" style="padding:0.65rem 1.25rem; border:1px solid var(--border); background:white; border-radius:8px; cursor:pointer; font-weight:500; color:var(--text-main);">
+                    Cancelar
+                </button>
+                <button onclick="generarReporteAnio()" style="padding:0.65rem 1.25rem; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                    <i class="fas fa-file-pdf"></i> Generar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
     function escaparHtml(texto) {
@@ -327,13 +351,11 @@ $anios = range(date('Y') - 10, date('Y'));
         const divAnio = document.getElementById('divAnio');
 
         ocultarNotificacion();
-        
-        // Ocultar todos los divs
+
         divLocalidad.style.display = 'none';
         divSituacion.style.display = 'none';
         divAnio.style.display = 'none';
-        
-        // Mostrar según tipo
+
         if (tipo === 'comuneros_filtro') {
             divLocalidad.style.display = 'block';
             divSituacion.style.display = 'block';
@@ -345,9 +367,37 @@ $anios = range(date('Y') - 10, date('Y'));
         }
     }
 
+    let _tipoReporteAnio = '';
+
+    function abrirModalAnio(tipo, titulo) {
+        _tipoReporteAnio = tipo;
+        document.getElementById('modalAnioTitulo').textContent = titulo;
+        document.getElementById('modalAnio').style.display = 'flex';
+    }
+
+    function cerrarModalAnio() {
+        document.getElementById('modalAnio').style.display = 'none';
+        _tipoReporteAnio = '';
+    }
+
+    function generarReporteAnio() {
+        const anio = document.getElementById('selectAnioModal').value;
+        window.open('/proyectocomunitario/public/reportes_generar.php?tipo=' + _tipoReporteAnio + '&anio=' + anio, '_blank');
+        cerrarModalAnio();
+    }
+
+    document.getElementById('modalAnio').addEventListener('click', function(e) {
+        if (e.target === this) cerrarModalAnio();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') cerrarModalAnio();
+    });
+
+    // ── Envío del formulario de filtros ───────────────────────────────────────
     document.getElementById('frmReporteFiltro').addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         const tipo = document.getElementById('tipoFiltro').value;
         if (!tipo) {
             mostrarNotificacion('warning', 'Por favor selecciona un tipo de reporte antes de generarlo.');
@@ -359,14 +409,13 @@ $anios = range(date('Y') - 10, date('Y'));
         const params = new URLSearchParams();
         params.append('tipo', tipo);
 
-        // Agregar parámetros opcionales
         const localidad = document.querySelector('select[name="localidad"]').value;
         const situacion = document.querySelector('select[name="situacion"]').value;
-        const anio = document.querySelector('select[name="anio"]').value;
+        const anio      = document.querySelector('select[name="anio"]').value;
 
         if (localidad) params.append('localidad', localidad);
         if (situacion) params.append('situacion', situacion);
-        if (anio) params.append('anio', anio);
+        if (anio)      params.append('anio', anio);
 
         window.open('/proyectocomunitario/public/reportes_generar.php?' + params.toString(), '_blank');
     });

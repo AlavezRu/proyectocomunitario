@@ -6,31 +6,14 @@ require_once '../../Shared/Infrastructure/Database/Connection.php';
 $pageTitle = "Actas de Posesión";
 $activePage = "actas";
 
-// Paginación básica
-$por_pagina = 15;
-$pagina_actual = isset($_GET['p']) ? (int)$_GET['p'] : 1;
-if ($pagina_actual < 1) $pagina_actual = 1;
-$offset = ($pagina_actual - 1) * $por_pagina;
-
-// Total de actas de comuneros activos
-$q_total = pg_query($conexion, "
-    SELECT COUNT(*)
-    FROM acta_posesion a
-    JOIN comunero c ON a.id_comunero = c.id_comunero
-    WHERE c.activo = TRUE
-");
-$total_registros = pg_fetch_result($q_total, 0, 0);
-$total_paginas = ceil($total_registros / $por_pagina);
-
-// Obtener actas
+// Obtener todas las actas (sin paginación para permitir búsqueda en tiempo real)
 $query = "
-    SELECT a.id_acta, a.fecha_acta, c.nombre_completo, c.numero_progresivo, 
+    SELECT a.id_acta, a.fecha_acta, c.nombre_completo, c.numero_progresivo,
            (SELECT COUNT(*) FROM archivo ar WHERE ar.id_acta = a.id_acta) as num_archivos
     FROM acta_posesion a
     JOIN comunero c ON a.id_comunero = c.id_comunero
     WHERE c.activo = TRUE
     ORDER BY a.fecha_acta DESC
-    LIMIT $por_pagina OFFSET $offset
 ";
 $resultado = pg_query($conexion, $query);
 
@@ -164,7 +147,10 @@ $resultado = pg_query($conexion, $query);
             </div>
 
             <div class="glass-panel" style="padding: 1.5rem;">
-                <div style="overflow-x: auto;">
+                <div style="margin-bottom: 1.5rem;">
+                    <input type="text" id="busquedaInput" placeholder="Buscar por nombre de comunero o número progresivo..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 0.875rem;">
+                </div>
+                <div style="overflow-x: auto; max-height: 600px;">
                     <table style="width: 100%; border-collapse: collapse; text-align: left;">
                         <thead>
                             <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 600; font-size: 0.875rem;">
@@ -178,7 +164,7 @@ $resultado = pg_query($conexion, $query);
                         <tbody>
                             <?php if (pg_num_rows($resultado) > 0): ?>
                                 <?php while ($row = pg_fetch_assoc($resultado)): ?>
-                                    <tr style="border-bottom: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
+                                    <tr class="fila-acta" data-nombre="<?= strtolower(htmlspecialchars($row['nombre_completo'])) ?>" data-numero="<?= str_pad($row['numero_progresivo'], 4, '0', STR_PAD_LEFT) ?>" style="border-bottom: 1px solid var(--border); transition: var(--transition-fast);" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
                                         <td style="padding: 1rem 0.5rem; font-weight: 500;"><?= str_pad($row['numero_progresivo'], 4, '0', STR_PAD_LEFT) ?></td>
                                         <td style="padding: 1rem 0.5rem;"><?= htmlspecialchars($row['nombre_completo']) ?></td>
                                         <td style="padding: 1rem 0.5rem;"><?= date('d/m/Y', strtotime($row['fecha_acta'])) ?></td>
@@ -213,18 +199,6 @@ $resultado = pg_query($conexion, $query);
                     </table>
                 </div>
 
-                <!-- Paginación -->
-                <?php if ($total_paginas > 1): ?>
-                <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
-                    <?php for ($i=1; $i<=$total_paginas; $i++): ?>
-                        <a href="/proyectocomunitario/public/index.php?page=actas&p=<?= $i ?>" 
-                           style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); text-decoration: none; font-weight: 500; font-size: 0.875rem;
-                           <?= $i == $pagina_actual ? 'background: var(--primary); color: white; box-shadow: var(--shadow-md);' : 'background: white; border: 1px solid var(--border); color: var(--text-muted);' ?>">
-                            <?= $i ?>
-                        </a>
-                    <?php endfor; ?>
-                </div>
-                <?php endif; ?>
 
             </div>
         </div>
@@ -292,6 +266,23 @@ $resultado = pg_query($conexion, $query);
             if (e.target === this) {
                 cerrarModalEliminar();
             }
+        });
+
+        // Búsqueda en tiempo real
+        document.getElementById('busquedaInput').addEventListener('keyup', function() {
+            const termino = this.value.toLowerCase();
+            const filas = document.querySelectorAll('.fila-acta');
+
+            filas.forEach(fila => {
+                const nombre = fila.getAttribute('data-nombre');
+                const numero = fila.getAttribute('data-numero');
+
+                if (nombre.includes(termino) || numero.includes(termino)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>

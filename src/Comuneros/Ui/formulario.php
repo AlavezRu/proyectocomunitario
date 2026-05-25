@@ -240,11 +240,11 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
                         </div>
                         <div class="form-group">
                             <label class="form-label">Número R.A.N.</label>
-                            <input type="text" name="numero_ran" class="form-control" value="<?= htmlspecialchars($comunero['numero_ran']) ?>">
+                            <input type="text" name="numero_ran" class="form-control" data-no-titlecase value="<?= htmlspecialchars($comunero['numero_ran']) ?>">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Número de Certificado</label>
-                            <input type="text" name="numero_certificado" class="form-control" value="<?= htmlspecialchars($comunero['numero_certificado']) ?>">
+                            <input type="text" name="numero_certificado" class="form-control" data-no-titlecase value="<?= htmlspecialchars($comunero['numero_certificado']) ?>">
                         </div>
                     </div>
                     
@@ -255,7 +255,7 @@ if (!$modo_edicion && !$comunero['color_mapa']) {
 
                     <div class="form-group">
                         <label class="form-label">Teléfono</label>
-                        <input type="tel" name="telefono" id="telefono" class="form-control" value="<?= htmlspecialchars($comunero['telefono'] ?? '') ?>" placeholder="Ej. 1234567890" maxlength="10" pattern="^\d{10}$" inputmode="numeric" title="Ingrese solo 10 numeros">
+                        <input type="tel" name="telefono" id="telefono" class="form-control" data-no-titlecase value="<?= htmlspecialchars($comunero['telefono'] ?? '') ?>" placeholder="Ej. 1234567890" maxlength="10" pattern="^\d{10}$" inputmode="numeric" title="Ingrese solo 10 numeros" oninput="this.value=this.value.replace(/\D/g,'')">
                     </div>
                     
                     <div class="form-group">
