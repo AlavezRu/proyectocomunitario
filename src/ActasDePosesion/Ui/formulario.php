@@ -1157,7 +1157,7 @@ if ($q_localidades) {
             // Coordenadas fijas por comunidad
             const coordenadasComunidades = {
                 'gavillera':        [17.609956445951376, -97.27334527452484],
-                'soyatepec':        [17.59245671490403,  -97.30955349838028],
+                'soyaltepec':        [17.59245671490403,  -97.30955349838028],
                 'la union reforma': [17.580575784419143, -97.28478471527424],
                 'tejocotal':        [17.599406174103784, -97.28524531812714],
                 'rio verde':        [17.570968820630586, -97.3046363469873]

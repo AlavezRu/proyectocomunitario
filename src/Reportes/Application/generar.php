@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('America/Mexico_City');
 require_once __DIR__ . '/../../Shared/Infrastructure/Database/Connection.php';
 
 $tipo_reporte = isset($_GET['tipo']) ? $_GET['tipo'] : '';
@@ -32,7 +33,7 @@ switch ($tipo_reporte) {
         break;
 
     case 'adeudo_predial':
-        $anio = date('Y');
+        $anio = isset($_GET['anio']) ? (int)$_GET['anio'] : date('Y');
         $titulo = "Comuneros con Adeudo Predial ($anio)";
         $q = pg_query($conexion, "
             SELECT c.numero_progresivo, c.nombre_completo, l.nombre as localidad

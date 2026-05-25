@@ -362,9 +362,15 @@ if ($resultado_sucesores_raw) {
                                         <td style="padding: 1rem 0.5rem;"><?= htmlspecialchars($row['nombre_completo']) ?></td>
                                         <td style="padding: 1rem 0.5rem;">
                                             <?php if (!empty($row['telefono'])): ?>
-                                                <a href="tel:<?= htmlspecialchars($row['telefono']) ?>" style="color: var(--primary); text-decoration: none; font-weight: 500;">
-                                                    <i class="fas fa-phone"></i> <?= htmlspecialchars($row['telefono']) ?>
-                                                </a>
+                                                <?php $telefonoLimpio = preg_replace('/\D/', '', $row['telefono']); ?>
+                                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                    <a href="tel:<?= htmlspecialchars($row['telefono']) ?>" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                                                        <i class="fas fa-phone"></i> <?= htmlspecialchars($row['telefono']) ?>
+                                                    </a>
+                                                    <a href="https://wa.me/52<?= $telefonoLimpio ?>" target="_blank" rel="noopener noreferrer" title="Enviar mensaje por WhatsApp" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: rgba(37, 211, 102, 0.12); color: #25d366; border-radius: 50%; text-decoration: none; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(37,211,102,0.25)'" onmouseout="this.style.background='rgba(37,211,102,0.12)'">
+                                                        <i class="fab fa-whatsapp"></i>
+                                                    </a>
+                                                </div>
                                             <?php else: ?>
                                                 <span style="color: var(--text-muted);">-</span>
                                             <?php endif; ?>
@@ -424,9 +430,15 @@ if ($resultado_sucesores_raw) {
                                         <td style="padding: 1rem 0.5rem;"><?= htmlspecialchars($row['nombre_completo']) ?></td>
                                         <td style="padding: 1rem 0.5rem;">
                                             <?php if (!empty($row['telefono'])): ?>
-                                                <a href="tel:<?= htmlspecialchars($row['telefono']) ?>" style="color: var(--primary); text-decoration: none; font-weight: 500;">
-                                                    <i class="fas fa-phone"></i> <?= htmlspecialchars($row['telefono']) ?>
-                                                </a>
+                                                <?php $telefonoLimpio = preg_replace('/\D/', '', $row['telefono']); ?>
+                                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                    <a href="tel:<?= htmlspecialchars($row['telefono']) ?>" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                                                        <i class="fas fa-phone"></i> <?= htmlspecialchars($row['telefono']) ?>
+                                                    </a>
+                                                    <a href="https://wa.me/52<?= $telefonoLimpio ?>" target="_blank" rel="noopener noreferrer" title="Enviar mensaje por WhatsApp" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: rgba(37, 211, 102, 0.12); color: #25d366; border-radius: 50%; text-decoration: none; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(37,211,102,0.25)'" onmouseout="this.style.background='rgba(37,211,102,0.12)'">
+                                                        <i class="fab fa-whatsapp"></i>
+                                                    </a>
+                                                </div>
                                             <?php else: ?>
                                                 <span style="color: var(--text-muted);">-</span>
                                             <?php endif; ?>

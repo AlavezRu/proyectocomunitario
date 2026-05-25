@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /d \"c:\\\\xampp\")",
+      "Bash(bin\\\\psql.exe -U postgres -d syscomunal -c \"SELECT id_localidad, nombre FROM localidad WHERE nombre ILIKE '%soyatepec%';\")",
+      "Read(//c/xampp/**)",
+      "PowerShell(Get-Command psql -ErrorAction SilentlyContinue)",
+      "Read(//c/Program Files/PostgreSQL/**)",
+      "Read(//c//**)",
+      "PowerShell(& \"c:\\\\xampp\\\\php\\\\php.exe\" \"c:\\\\xampp\\\\htdocs\\\\proyectocomunitario\\\\public\\\\fix_localidad.php\")",
+      "PowerShell(& \"c:\\\\xampp\\\\php\\\\php.exe\" -d extension_dir=\"c:\\\\xampp\\\\php\\\\ext\" -d extension=pgsql \"c:\\\\xampp\\\\htdocs\\\\proyectocomunitario\\\\public\\\\fix_localidad.php\")"
+    ]
+  }
+}

@@ -104,6 +104,7 @@ while ($row = pg_fetch_assoc($resultado_roles)) {
                            <input type="text" name="usuario" class="form-control" required maxlength="100" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+"
                                oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '')"
                                title="Solo se permiten letras."
+                               data-no-titlecase
                                value="<?= $modo === 'editar' ? htmlspecialchars($usuarioEditar['usuario']) : '' ?>"
                                placeholder="Ej. jperez">
                     </div>

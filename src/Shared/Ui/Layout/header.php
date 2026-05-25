@@ -46,9 +46,55 @@ function toggleDropdown(e) {
 // Cerrar dropdown al hacer clic fuera
 document.addEventListener('click', function(e) {
     const dropdown = document.getElementById('userDropdown');
-    const profileBtn = document.querySelector('.user-profile-btn');
     if (!e.target.closest('.user-profile-dropdown')) {
         dropdown.style.display = 'none';
     }
 });
+
+// ── Title Case global ──────────────────────────────────────────────────────
+// Usa event delegation para cubrir también inputs creados dinámicamente
+// (ej. sucesores agregados en tiempo real). Se excluyen los campos con
+// data-no-titlecase y los tipos que no son texto libre.
+(function () {
+    var TIPOS_EXCLUIDOS = ['password','email','number','date','hidden','search','url','tel'];
+
+    function toTitleCase(str) {
+        return str.split(' ').map(function (word) {
+            if (word.length === 0) return word;
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }).join(' ');
+    }
+
+    function debeAplicar(el) {
+        if (!el || !el.tagName) return false;
+        var tag = el.tagName.toUpperCase();
+        if (tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
+        if (tag === 'INPUT' && TIPOS_EXCLUIDOS.indexOf(el.type) !== -1) return false;
+        if (el.dataset.noTitlecase !== undefined) return false;
+        if (!el.closest('form')) return false;
+        return true;
+    }
+
+    function aplicar(el) {
+        var start = el.selectionStart;
+        var end   = el.selectionEnd;
+        var nuevo = toTitleCase(el.value);
+        if (el.value !== nuevo) {
+            el.value = nuevo;
+            if (el.setSelectionRange) el.setSelectionRange(start, end);
+        }
+    }
+
+    // input: dispara mientras el usuario escribe (bubbles → delegation funciona)
+    document.addEventListener('input', function (e) {
+        if (debeAplicar(e.target)) aplicar(e.target);
+    });
+
+    // blur no burbujea, se usa capture para atrapar el evento
+    document.addEventListener('blur', function (e) {
+        if (debeAplicar(e.target)) {
+            e.target.value = toTitleCase(e.target.value.trim());
+        }
+    }, true);
+})();
 </script>
