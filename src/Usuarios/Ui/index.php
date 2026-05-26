@@ -1,4 +1,9 @@
 <?php
+/**
+ * SysComunal - Sistema de Gestión Comunal
+ * Desarrollado por: Mario Ruiz Alavez
+ * Correo: ruizmario04574@gmail.com
+ */
 require_once __DIR__ . '/../../Shared/Infrastructure/Auth/require_admin.php';
 require_once __DIR__ . '/../../Shared/Infrastructure/Database/Connection.php';
 
