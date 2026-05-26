@@ -33,7 +33,7 @@ $q_total = pg_query($conexion, "SELECT COUNT(*) FROM tequio");
 $total_tequios = pg_fetch_result($q_total, 0, 0);
 $total_paginas = ceil($total_tequios / $por_pagina);
 
-$q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento_tequio c WHERE c.id_tequio = t.id_tequio AND c.cumplio = TRUE) as asistencias FROM tequio t ORDER BY t.fecha DESC LIMIT $por_pagina OFFSET $offset");
+$q_tequios = pg_query($conexion, "SELECT t.*, (SELECT COUNT(*) FROM cumplimiento_tequio c WHERE c.id_tequio = t.id_tequio AND c.cumplio = TRUE) as asistencias FROM tequio t ORDER BY t.id_tequio ASC LIMIT $por_pagina OFFSET $offset");
 ?>
 <!DOCTYPE html>
 <html lang="es">

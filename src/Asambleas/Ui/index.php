@@ -32,7 +32,7 @@ $q_total = pg_query($conexion, "SELECT COUNT(*) FROM asamblea");
 $total_asambleas = pg_fetch_result($q_total, 0, 0);
 $total_paginas = ceil($total_asambleas / $por_pagina);
 
-$q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia_asamblea asis WHERE asis.id_asamblea = a.id_asamblea AND asis.asistio = TRUE) as asistentes FROM asamblea a ORDER BY a.fecha DESC LIMIT $por_pagina OFFSET $offset");
+$q_asambleas = pg_query($conexion, "SELECT a.*, (SELECT COUNT(*) FROM asistencia_asamblea asis WHERE asis.id_asamblea = a.id_asamblea AND asis.asistio = TRUE) as asistentes FROM asamblea a ORDER BY a.id_asamblea ASC LIMIT $por_pagina OFFSET $offset");
 ?>
 <!DOCTYPE html>
 <html lang="es">
